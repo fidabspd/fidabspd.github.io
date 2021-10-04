@@ -1,0 +1,16 @@
+current directory: /home/jeonghunkim/repo/fidabspd.github.io/vendor/bundle/ruby/2.7.0/gems/eventmachine-1.2.7/ext/fastfilereader
+/home/jeonghunkim/.rbenv/versions/2.7.4/bin/ruby -I /home/jeonghunkim/.rbenv/versions/2.7.4/lib/ruby/2.7.0 -r ./siteconf20211004-17188-1a3rvbt.rb extconf.rb
+creating Makefile
+
+current directory: /home/jeonghunkim/repo/fidabspd.github.io/vendor/bundle/ruby/2.7.0/gems/eventmachine-1.2.7/ext/fastfilereader
+make "DESTDIR=" clean
+
+current directory: /home/jeonghunkim/repo/fidabspd.github.io/vendor/bundle/ruby/2.7.0/gems/eventmachine-1.2.7/ext/fastfilereader
+make "DESTDIR="
+compiling mapper.cpp
+compiling rubymain.cpp
+linking shared-object fastfilereaderext.so
+
+current directory: /home/jeonghunkim/repo/fidabspd.github.io/vendor/bundle/ruby/2.7.0/gems/eventmachine-1.2.7/ext/fastfilereader
+make "DESTDIR=" install
+/usr/bin/install -c -m 0755 fastfilereaderext.so ./.gem.20211004-17188-wg04cl

@@ -1,18 +1,24 @@
 ---
-layout: page
-title: About
-permalink: /about/
-main_nav: true
+layout: default
+title: About Long Haul
 ---
 
-![alt text]({{ site.baseurl }}/assets/profile-placeholder.gif "Profile Picture"){:.profile}
-
-Centrarium is a custom theme for Jekyll, made by [Ben Centra][bencentra] for his own blog. He'd be humbled if you liked it enough to use it as well! Installation and configuration instructions can be found in the [GitHub repository](https://github.com/bencentra/centrarium).
-
-This page is a good place to write about yourself, your project, your product, or whatever it is your site is for. You can replace the image above, or you can get rid of it entirely. 
-
-You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](http://jekyllrb.com/). And you can find the source code for Jekyll at [github.com/jekyll/jekyll](https://github.com/jekyll/jekyll)
-
-[centrarium]: https://github.com/bencentra/centrarium
-[bencentra]: http://bencentra.com
-[jekyll]: https://github.com/jekyll/jekyll
+<div class="post">
+	<h1 class="pageTitle">About Long Haul</h1>
+	<img src="{{ '/assets/img/touring.jpg' }}" alt="">
+	<p class="intro">Long Haul is a minimal, long form <a href="http://jekyllrb.com">Jekyll</a> Theme. It can be used as is or customized to your hearts desire.</p>
+	<p>Long Haul was created in honor of all the hard working touring bicycles that have traversed the globe time and time again. Take it for a spin.</p>
+	<h2>Features</h2>
+	<ul>
+		<li>Built with SASS + GULP + BROWSERSYNC + AUTOPREFIXER</li>
+  		<li>SVG Social Icons from <a href="http://customizr.net/icons/">Customizr</a></li>
+  		<li><a href="http://responsive-nav.com/">Responsive Nav Menu</a></li>
+  		<li><a href="https://github.com/snaptortoise/jekyll-rss-feeds">XML Feed for RSS Readers</a></li>
+  		<li>Contact Form via <a href="http://formspree.io/">Formspree</a></li>
+      <li>5 Post Loop with excerpt on Home Page</li>
+  		<li>Previous / Next Post Navigation</li>
+      <li>Estimated Reading Time for posts</li>
+  		<li><a href="https://github.com/adobe-webplatform/dropcap.js">Drop Cap</a> on posts</li>
+  		<li><a href="http://typecast.com/blog/a-more-modern-scale-for-web-typography">A Better Type Scale</a></li>
+  	</ul>
+</div>
