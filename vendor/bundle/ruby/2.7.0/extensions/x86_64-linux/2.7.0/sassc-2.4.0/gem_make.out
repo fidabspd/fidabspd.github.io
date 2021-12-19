@@ -1,5 +1,5 @@
 current directory: /home/jeonghunkim/repo/fidabspd.github.io/vendor/bundle/ruby/2.7.0/gems/sassc-2.4.0/ext
-/home/jeonghunkim/.rbenv/versions/2.7.4/bin/ruby -I /home/jeonghunkim/.rbenv/versions/2.7.4/lib/ruby/2.7.0 -r ./siteconf20211218-10999-1gmcyia.rb extconf.rb
+/home/jeonghunkim/.rbenv/versions/2.7.4/bin/ruby -I /home/jeonghunkim/.rbenv/versions/2.7.4/lib/ruby/2.7.0 -r ./siteconf20211219-27156-e4c2oh.rb extconf.rb
 creating Makefile
 
 current directory: /home/jeonghunkim/repo/fidabspd.github.io/vendor/bundle/ruby/2.7.0/gems/sassc-2.4.0/ext
@@ -77,4 +77,4 @@ linking shared-object sassc/libsass.so
 
 current directory: /home/jeonghunkim/repo/fidabspd.github.io/vendor/bundle/ruby/2.7.0/gems/sassc-2.4.0/ext
 make "DESTDIR=" install
-/usr/bin/install -c -m 0755 libsass.so ./.gem.20211218-10999-61cc79/sassc
+/usr/bin/install -c -m 0755 libsass.so ./.gem.20211219-27156-167kqgc/sassc
