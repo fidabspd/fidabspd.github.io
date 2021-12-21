@@ -10,7 +10,7 @@ favicon: assets/favicon.ico                             # Icon displayed in the 
 
 # Header and footer text
 header_text: Welcome!  # Change Blog header text
-header_feature_image: assets/img/pexels/triangular.jpeg
+header_feature_image: assets/img/home_image.jpeg
 footer_text: >
   Written by Jeonghun Kim
 
@@ -50,7 +50,12 @@ collections:
 sass:
   style: compressed
 plugins: [jekyll-paginate, jekyll-seo-tag, jekyll-feed]
-exclude: [".jekyll-cache", ".idea", "vendor/*", "assets/node_modules/*"]
+exclude:
+  - ".jekyll-cache"
+  - ".idea"
+  - "vendor/*"
+  - "assets/node_modules/*"
+  - "./memo.md"
 
 # theme: type-on-strap                                  # if using the theme as a jekyll theme gem
 remote_theme: sylhare/Type-on-Strap                     # If using as a remote_theme in github
