@@ -1,4 +1,3 @@
-{% comment %}
 {% if site.data.social.rss or site.theme_settings.rss %}
 <li>
     <a feed.xml href="{{ site.data.social.feed.path | default: 'feed.xml' | relative_url }}"
@@ -11,7 +10,6 @@
     </a>
 </li>
 {% endif %}
-{% endcomment %}
 
 {% for footer in site.data.icons %}
     {% unless footer[1] == nil %}
