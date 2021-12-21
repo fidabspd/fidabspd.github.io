@@ -18,3 +18,13 @@ unknown:
   name: Unknown
   avatar:
   url:
+fidabspd :
+  username: Jeonghun    # user name : martin
+  name: Jeonghun Kim        # user full name : Martin Luther King
+  url_full:             # Homepage url
+  url:
+  bio:  # company
+  picture: assets/built/images/fidabspd_author_image.png   # author image
+  facebook:             # facebook ID
+  twitter:              # twitter ID
+  cover: False
