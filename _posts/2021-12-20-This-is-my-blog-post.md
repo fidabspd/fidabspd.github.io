@@ -6,8 +6,9 @@ author: fidabspd
 excerpt_separator: <!--more-->
 ---
 
+첫 포스팅. 미리보기는 여기까지.  
+<!--more-->
+
 # First Posting
 
-여기까지가 미리보기
-<!--more-->
-여기부터는 열어야 보임 엔터키는 안보임
+Hello!
