@@ -2,7 +2,6 @@
 layout: post
 title: First Posting
 tags: [First]
-author: fidabspd
 excerpt_separator: <!--more-->
 ---
 
