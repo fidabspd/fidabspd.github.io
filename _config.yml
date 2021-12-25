@@ -5,12 +5,12 @@ url: "https://fidabspd.github.io"
 # THEME-SPECIFIC CONFIGURATION
 title: Keep Calm and Code On                                    # site's title
 # description: "A website with blog posts and pages"      # Short description, primarily used by search engines
-# avatar: assets/img/avatar.jpg                         # Empty for no avatar in navbar
+avatar: assets/img/avatar.png                         # Empty for no avatar in navbar
 favicon: assets/favicon.ico                             # Icon displayed in the tab
 
 # Header and footer text
-header_text: Welcome!  # Change Blog header text
-header_feature_image: assets/img/home_image.jpeg
+header_text: Jeonghun's Blog  # Change Blog header text
+header_feature_image: assets/img/home_image.png
 footer_text: >
   © Jeonghun Kim 2021
 
