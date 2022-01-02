@@ -6,7 +6,7 @@ url: "https://fidabspd.github.io"
 title: Keep Calm and Code On                                    # site's title
 # description: "A website with blog posts and pages"      # Short description, primarily used by search engines
 avatar: assets/img/config/avatar.png                         # Empty for no avatar in navbar
-favicon: assets/favicon.ico                             # Icon displayed in the tab
+favicon: assets/img/config/favicon.ico                             # Icon displayed in the tab
 
 # Header and footer text
 header_text: Jeonghun's Blog  # Change Blog header text
