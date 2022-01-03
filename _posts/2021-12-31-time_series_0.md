@@ -92,7 +92,7 @@ window_size + target_length: 120 + 10 = 130
 data
 ```
 
-![data](/assets/img/posts/2021-12-31-time_series_0/data.png)  
+![data](/assets/img/posts/time_series_0/data.png)  
 20년 6월 1일부터 20년 8월 24일까지 시간단위로 데이터가 있습니다.
 
 #### train, valid, test 구성
@@ -194,7 +194,7 @@ train, valid, test = split_data(data, CONFIGS)
 train
 ```
 
-![train](/assets/img/posts/2021-12-31-time_series_0/train.png)  
+![train](/assets/img/posts/time_series_0/train.png)  
 
 ```python
 seqence_length = 2040 - 48  # valid와 test를 빼줬기 때문에 -48
@@ -280,7 +280,7 @@ model = set_model(CONFIGS, print_summary=True)
 history = train_model(model, train, valid, CONFIGS)
 ```
 
-![model_summary](/assets/img/posts/2021-12-31-time_series_0/model_summary.png)  
+![model_summary](/assets/img/posts/time_series_0/model_summary.png)  
 
 best model을 load하여 test를 예측하고 성능을 비교해보겠습니다.
 
