@@ -46,7 +46,7 @@ excerpt_separator: <!--more-->
 
 - 이전 몇 time 을 사용하여 다음 값을 예측할 것인지
 - 다음 몇 time 동안의 값을 예측할 것인지
-- 예측을 몇 time 단위로 띄어가며 진행할 것인지
+- 예측을 몇 time 단위로 띄어가며 진행할 것인지 (데이터의 양 조절)
 
 그리고 각각을 앞으로 다음과 같이 칭하겠습니다. (완전히 약속된 단어는 아니지만 통상 이렇게 지칭하면 의사소통에 문제는 없습니다.)
 
@@ -93,8 +93,44 @@ data
 ```
 
 ![data](/assets/img/posts/2021-12-31-time_series_0/data.png)  
-20년 6월 1일부터 20년 8월 24일까지 시간단위로 데이터가 있습니다.  
-이중 20년 8월 23일은 valid_data, 20년 8월 24일은 test_data, 나머지는 train_data로 사용하여 data를 OROD형태로 재구성 해보겠습니다.  
+20년 6월 1일부터 20년 8월 24일까지 시간단위로 데이터가 있습니다.
+
+#### train, valid, test 구성
+
+간단하게 testset은 마지막날인 8월 24일로 하고 이를 예측하는 모델을 구성해보도록 하겠습니다.  
+그런데 validset은 어떻게 구성하면 좋을까요?  
+구성에 고려해야할 것은 여러가지가 있지만 크게 두가지정도만 짚겠습니다.
+
+1. validset이 시계열 데이터의 주기를 모두 포함하였는지
+2. 전체 데이터 중 어떤 데이터를 valid로 사용할 지
+
+우선 **1번**고려사항에 관해서는, validset은 당연히 시계열 데이터의 주기를 모두 포함하는 것이 좋습니다.  
+어떤 도로의 교통량을 예측하는 데 validset을 주말 시간대로만 구성한다면 주말만 잘 맞추는 모델이 되겠죠?  
+하지만 현실적으로 모든 주기를 모두 포함하기는 쉽지 않기 때문에 상황에 따른 적절한 분배가 필요합니다.
+
+**2번**고려사항에 관해서는, 데이터를 구성하는 방법은 크게 두가지 정도로 생각할 수 있으며 장단점은 다음과 같습니다.
+
+1. train의 일부를 임의로 추출하여 valid로 사용한다.
+    - 장점
+        - test를 예측하기 위해 가장 중요한 데이터인 바로 전 기간을 학습에 사용할 수 있다.
+    - 단점
+        - valid score를 신뢰하기 힘들다.
+            - 시간에 따라 경사가 급한 파도형태의 데이터가 아닌 이상 앞 뒤 데이터를 학습에 활용했다면 그 사이 데이터는 잘 맞출 수 밖에 없다.
+2. test 바로 직전의 기간을 valid로 사용한다.
+    - 장점
+        - validset을 testset에 가장 근접하게 구성한 만큼 valid score를 신뢰할 수 있다.
+    - 단점
+        - testset에 가장 근접한 데이터를 학습에 활용할 수 없다.
+
+    2번 방법을 사용하여 valid score에 대한 신뢰도를 높이면서 이를 train에도 활용하는 방법도 있긴 합니다.  
+    trainset만으로 모든 hyperparameter에 대한 tuning을 마치고 validset을 trainset에 포함시켜 다시 train하는 방법입니다.  
+    다만 이는 trainset만으로 hyperparameter를 tuning하였기 때문에 validset이 train에 포함되는 순간 결과가 이상해지는 경우가 생길 수 있습니다.  
+    이런 이유로 딥러닝 모델에는 특히 추천하고 싶지 않습니다.
+
+전체적인 흐름보다 주기에 훨씬 의존적인 모습을 보인다면 **1번**을 사용할 수도 있겠습니다. 다만 대부분의 경우에 **2번**방법을 추천드립니다.
+
+저는 **2번**방법을 사용하여 20년 8월 23일은 valid_data, 20년 8월 24일은 test_data, 나머지는 train_data로 사용하여 data를 OROD형태로 재구성 해보겠습니다.  
+(weekly와 monthly 주기는 일단은 고려하지 않겠습니다.)
 
 - ```window_size```: 7*24 (7일)
 - ```target_length```: 3 (3시간)
@@ -166,9 +202,124 @@ window_size = 24*7
 target_lenght = 3
 interval = 1
 
-((seqence_length - (window_size+target_lenght)) / interval) + 1
-
+nrow = ((seqence_length - (window_size+target_lenght)) / interval) + 1
+print(f'총 row 수: {nrow}')
 # 총 row 수: 1822
 ```
 
 계산대로 총 1822개의 row가 생긴 모습입니다.
+
+## Modeling
+
+아주 간단한 NN model을 만들고 훈련해 보겠습니다.  
+
+```python
+def set_model(CONFIGS, model_name = None, print_summary=False):
+    inputs = Input(batch_shape=(None, CONFIGS['window_size']), name='inputs')
+    dense_0 = Dense(64, activation='relu', name='dense_0')(inputs)
+    dense_1 = Dense(32, activation='relu', name='dense_1')(dense_0)
+    outputs = Dense(CONFIGS['target_length'], name='outputs')(dense_1)
+    
+    if not model_name:
+        model_name = CONFIGS['model_name']
+    
+    model = Model(
+        inputs, outputs,
+        name = model_name
+    )
+    
+    optimizer = Adam(learning_rate=CONFIGS['learning_rate'])
+    model.compile(
+        loss = 'mse',
+        optimizer = optimizer,
+    )
+    
+    if print_summary:
+        model.summary()
+    
+    return model
+
+
+def train_model(model, train, valid, CONFIGS):
+    
+    X_train, y_train = train[CONFIGS['input_cols']], train[CONFIGS['target_cols']]
+    X_valid, y_valid = valid[CONFIGS['input_cols']], valid[CONFIGS['target_cols']]
+    
+    early_stop = EarlyStopping(
+        patience=CONFIGS['es_patience']
+    )
+    save_best_only = ModelCheckpoint(
+        filepath = f'{CONFIGS["model_path"]}{CONFIGS["model_name"]}.h5',
+        monitor = 'val_loss',
+        save_best_only = True,
+        save_weights_only = True
+    )
+    
+    history = model.fit(
+        X_train, y_train,
+        batch_size = CONFIGS['batch_size'],
+        epochs = CONFIGS['epochs'],
+        validation_data = (X_valid, y_valid),
+        callbacks = [
+            early_stop,
+            save_best_only,
+        ]
+    )
+    
+    return history
+
+
+CONFIGS['model_path'] = '../model/'
+CONFIGS['model_name'] = 'super_basic'
+CONFIGS['batch_size'] = 64
+CONFIGS['learning_rate'] = 1e-4
+CONFIGS['epochs'] = 100
+CONFIGS['es_patience'] = 10
+
+model = set_model(CONFIGS, print_summary=True)
+history = train_model(model, train, valid, CONFIGS)
+```
+
+![model_summary](/assets/img/posts/2021-12-31-time_series_0/model_summary.png)  
+
+best model을 load하여 test를 예측하고 성능을 비교해보겠습니다.
+
+```python
+best_model = set_model(CONFIGS, model_name='best_'+CONFIGS['model_name'])
+best_model.load_weights(f'{CONFIGS["model_path"]}{CONFIGS["model_name"]}.h5')
+
+X_train, y_train = train[CONFIGS['input_cols']], train[CONFIGS['target_cols']]
+X_valid, y_valid = valid[CONFIGS['input_cols']], valid[CONFIGS['target_cols']]
+X_test, y_test = test[CONFIGS['input_cols']], test[CONFIGS['target_cols']]
+
+y_train_pred = best_model.predict(X_train)
+y_valid_pred = best_model.predict(X_valid)
+y_test_pred = best_model.predict(X_test)
+
+mse = MeanSquaredError()
+
+train_loss = mse(y_train, y_train_pred).numpy()
+valid_loss = mse(y_valid, y_valid_pred).numpy()
+test_loss = mse(y_test, y_test_pred).numpy()
+
+print(f'train_loss: {train_loss}')
+print(f'valid_loss: {valid_loss}')
+print(f'test_loss: {test_loss}')
+
+# train_loss: 7653.4296875
+# valid_loss: 10269.60546875
+# test_loss: 14098.6875
+```
+
+데이터 구성부터 간단한 모델링까지 마쳤습니다.
+**(모델 성능을 높이기 위한 고민을 담은 포스팅은 아니기 때문에 당장 모델 성능은 신경쓰지 않습니다.)**
+
+처음부터 정독하셨다면 이런저런 의문점들이 생기는 부분이 생기셨을 수 있습니다. 예상되는 것들을 적어보자면
+
+- 매번 데이터 구성을 저렇게 매뉴얼하게 할 것인가?
+- scaling은 안해도 되나?
+- testset의 시간은 24시간인데 target_length를 3으로 구성하면 알지 못한다고 가정한 testset의 target이 input으로 들어간거 아닌가?
+
+등등 외의 여러개가 있을 것으로 예상됩니다.  
+
+모든 의문점을 해결할 수는 없겠지만 이런 의문들에 대한 내용은 앞서 적혀있던 목차에 따라 이어질 포스팅에서 다룰 예정입니다.
