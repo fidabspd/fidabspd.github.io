@@ -32,7 +32,7 @@ color_theme: auto                                       # auto, dark or light
 comments:
   provider: "utterances"
   utterances:                                           # Enable by filling below information. For more info, go to https://utteranc.es
-    repo: "fidabspd/comments"                                               # your public comments repository (e.g. owner/repo)
+    repo: "fidabspd/blog_comments"                                               # your public comments repository (e.g. owner/repo)
     issue-term: "pathname"                                         # Issue term (e.g. "comment" consider issues with this word in the title as comments)
     src: "https://utteranc.es/client.js"
     theme: "github-light"
