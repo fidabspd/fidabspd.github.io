@@ -10,7 +10,7 @@ favicon: assets/img/config/favicon.ico                             # Icon displa
 
 # Header and footer text
 header_text: Jeonghun's Blog  # Change Blog header text
-header_feature_image: assets/img/config/home_image.png
+header_feature_image: assets/img/config/home_image.jpeg
 footer_text: >
   © Jeonghun Kim 2022
 
