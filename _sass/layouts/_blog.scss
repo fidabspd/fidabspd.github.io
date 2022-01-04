@@ -18,19 +18,19 @@
 
   /* --- Responsive --- */
   @media screen and (min-width: $break) {
-    background-size: 120% auto;
+    background-size: 100% auto;
   }
 
   @media screen and (max-width: $break) {
-    background-size: 200% auto;
+    background-size: 100% auto;
   }
 
   @media screen and (max-width: $sm-break) {
-    background-size: 250% auto;
+    background-size: 100% auto;
   }
 
   @media screen and (max-width: $x-sm-break) {
-    background-size: 300% auto;
+    background-size: 100% auto;
   }
 
   p:last-child {
@@ -39,7 +39,7 @@
 }
 
 #main {
-  background-position: 100% -50px, 0 center, center top;
+  background-position: 100% 0, 0 center, center top;
 }
 
 /* --- Post listing --- */
