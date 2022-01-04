@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 시계열 예측
+title: Time Series - 시계열 데이터의 기본적인 특징과 간단한 모델
 tags: [Time-Series, Tensorflow, Keras]
 excerpt_separator: <!--more-->
 ---
@@ -18,6 +18,8 @@ excerpt_separator: <!--more-->
 4. 시계열 데이터 scaling
 5. 시계열 target의 결측
 6. 이전의 예측값을 다음의 input으로 recursive하게 이용
+
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes)
 
 ***
 
@@ -60,7 +62,7 @@ excerpt_separator: <!--more-->
 
 비트코인의 가격이 분단위로 기록된 10일치 데이터를 가지고 있다고 가정하겠습니다.   
 이때 ```window_size = 120, target_length = 10, interval = 5```를 다른말로 하면  
-```이전 2시간의 데이터를 이용하여 이후 10분을 예측하며 5분마다 예측한다.```
+```이전 2시간의 데이터를 이용하여 이후 10분을 예측하며 5분 단위로 데이터를 구분한다.```
 라고 할 수 있습니다.
 
 #### 총 row 수
@@ -85,10 +87,34 @@ window_size + target_length: 120 + 10 = 130
 
 ## 데이터에 적용
 
-앞으로 사용하는 모든 데이터는 [DACON 전력사용량 예측 AI 경진대회](https://dacon.io/competitions/official/235736/overview/description)의 전력 사용량 데이터를 가공하여 사용합니다.  
-가공된 데이터는 다음과 같습니다.  
+#### 라이브러리
 
 ```python
+from copy import deepcopy
+
+import numpy as np
+import pandas as pd
+
+from tensorflow.keras.layers import *
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.keras.losses import MeanSquaredError
+```
+
+앞으로 사용하는 모든 데이터는 [DACON 전력사용량 예측 AI 경진대회](https://dacon.io/competitions/official/235736/overview/description)의 전력 사용량 데이터를 가공하여 사용합니다.  
+데이터는 다음과 같습니다.  
+
+```python
+data_path = '../data/'
+
+train_origin = pd.read_csv(data_path+'train.csv', encoding='cp949')
+data = deepcopy(train_origin)
+data.columns = [
+    'num', 'date_time', 'target', 'temp', 'wind',
+    'humid', 'rain', 'sun', 'non_elec_eq', 'sunlight_eq'
+]
+data = data.loc[data['num'] == 1, ['date_time', 'target']]
 data
 ```
 
@@ -137,6 +163,8 @@ data
 - ```interval```: 1 (1시간)
 
 ```python
+data = data[['target']]
+
 CONFIGS = {
     'test_lenght': 24,
     'valid_start_index': 1992,
@@ -322,4 +350,16 @@ print(f'test_loss: {test_loss}')
 
 등등 외의 여러개가 있을 것으로 예상됩니다.  
 
-모든 의문점을 해결할 수는 없겠지만 이런 의문들에 대한 내용은 앞서 적혀있던 목차에 따라 이어질 포스팅에서 다룰 예정입니다.
+모든 의문점을 해결할 수는 없겠지만 이런 의문들에 대한 내용은 목차에 따라 이어질 포스팅에서 다룰 예정입니다.
+
+## 목차
+
+0. **시계열 데이터의 기본적인 특징과 간단한 모델**
+1. tf.data.Dataset 이용
+2. 시계열 target 외에 다른 데이터를 함께 이용
+3. 독립적인 여러개의 시계열 데이터에 대한 예측
+4. 시계열 데이터 scaling
+5. 시계열 target의 결측
+6. 이전의 예측값을 다음의 input으로 recursive하게 이용
+
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes)
