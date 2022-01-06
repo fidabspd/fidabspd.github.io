@@ -54,7 +54,7 @@ excerpt_separator: <!--more-->
 
 - window_size
 - target_length
-- interval
+- interval (흔히 shift라고 칭하기도 합니다.)
 
 이들은 일종의 hyper parameter로 볼 수 있으며 상황과 데이터에 맞게 조절해야합니다.
 
