@@ -54,14 +54,14 @@ excerpt_separator: <!--more-->
 
 - window_size
 - target_length
-- interval (흔히 shift라고 칭하기도 합니다.)
+- shift
 
 이들은 일종의 hyper parameter로 볼 수 있으며 상황과 데이터에 맞게 조절해야합니다.
 
-#### window_size, target_length, interval 예시
+#### window_size, target_length, shift 예시
 
 비트코인의 가격이 분단위로 기록된 10일치 데이터를 가지고 있다고 가정하겠습니다.   
-이때 ```window_size = 120, target_length = 10, interval = 5```를 다른말로 하면  
+이때 ```window_size = 120, target_length = 10, shift = 5```를 다른말로 하면  
 ```이전 2시간의 데이터를 이용하여 이후 10분을 예측하며 5분 단위로 데이터를 구분한다.```
 라고 할 수 있습니다.
 
@@ -79,11 +79,11 @@ window_size + target_length: 120 + 10 = 130
 일반화 해보자면
 
 ```
-총 row 수: ((seqence_length - (window_size+target_lenght)) / interval) + 1
+총 row 수: ((seqence_length - (window_size+target_lenght)) / shift) + 1
 ```
 
 이렇게 표현이 가능합니다.  
-혹시라도 ```((seqence_length - (window_size+target_lenght))```가 ```interval```로 나눠 떨어지지 않는 것이 걱정이라면 각 숫자를 조정하거나, 앞부분 데이터를 조금 잘라내거나, 딱 한곳의 interval만 임의로 조정함으로서 해결할 수 있습니다.
+혹시라도 ```((seqence_length - (window_size+target_lenght))```가 ```shift```로 나눠 떨어지지 않는 것이 걱정이라면 각 숫자를 조정하거나, 앞부분 데이터를 조금 잘라내거나, 딱 한곳의 shift만 임의로 조정함으로서 해결할 수 있습니다.
 
 ## 데이터에 적용
 
@@ -160,7 +160,7 @@ data
 
 - ```window_size```: 7*24 (7일)
 - ```target_length```: 3 (3시간)
-- ```interval```: 1 (1시간)
+- ```shift```: 1 (1시간)
 
 ```python
 data = data[['target']]
@@ -228,9 +228,9 @@ train
 seqence_length = 2040 - 48  # valid와 test를 빼줬기 때문에 -48
 window_size = 24*7
 target_lenght = 3
-interval = 1
+shift = 1
 
-nrow = ((seqence_length - (window_size+target_lenght)) / interval) + 1
+nrow = ((seqence_length - (window_size+target_lenght)) / shift) + 1
 print(f'총 row 수: {nrow}')
 # 총 row 수: 1822
 ```
