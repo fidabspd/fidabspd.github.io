@@ -12,7 +12,7 @@ excerpt_separator: <!--more-->
 ## 목차
 
 1. **시계열 데이터의 기본적인 특징과 간단한 모델**
-1. tf.data.Dataset 이용
+1. tf.data.Dataset을 이용한 시계열 데이터 구성
 1. 시계열 target 외에 다른 데이터를 함께 이용
 1. 독립적인 여러개의 시계열 데이터에 대한 예측
 1. 시계열 데이터 scaling
@@ -355,7 +355,7 @@ print(f'test_loss: {test_loss}')
 ## 목차
 
 1. **시계열 데이터의 기본적인 특징과 간단한 모델**
-1. tf.data.Dataset 이용
+1. tf.data.Dataset을 이용한 시계열 데이터 구성
 1. 시계열 target 외에 다른 데이터를 함께 이용
 1. 독립적인 여러개의 시계열 데이터에 대한 예측
 1. 시계열 데이터 scaling
