@@ -35,7 +35,7 @@ excerpt_separator: <!--more-->
 
 #### 대부분 정형 데이터의 특징
 
-머신러닝 공부를 시작하는 단계에서 접하는 대부분의 정형 데이터들은 하나의 row가 하나의 데이터를 나타내는 경우가 많습니다. (편의상 앞으로 이런 데이터를 OneRowOneData를 축약하여 **OROD**이라고 부르도록 하겠습니다. ~~제가 방금 멋대로 정한 단어입니다. 다른데서 썼다가는 조금 민망할 수도 있습니다.~~) 튜토리얼로 많이 사용되는 캐글의 타이타닉 생존자 예측 데이터를 보면 하나의 row가 한명의 승객정보를 담고 있고, 이를 통해 해당 승객이 생존했는지 생존하지 못했는지 예측합니다. 하나의 row에 예측을 위해 사용될 input과 예측 target 값이 모여있습니다.  
+머신러닝 공부를 시작하는 단계에서 접하는 대부분의 정형 데이터들은 하나의 row가 하나의 데이터를 나타내는 경우가 많습니다. (편의상 앞으로 이런 데이터를 OneRowOneData를 축약하여 **OROD**이라고 부르도록 하겠습니다. ~~제가 방금 멋대로 정한 단어입니다.~~) 튜토리얼로 많이 사용되는 캐글의 타이타닉 생존자 예측 데이터를 보면 하나의 row가 한명의 승객정보를 담고 있고, 이를 통해 해당 승객이 생존했는지 생존하지 못했는지 예측합니다. 하나의 row에 예측을 위해 사용될 input과 예측 target 값이 모여있습니다.  
 
 #### 시계열 데이터의 One Row
 
@@ -118,7 +118,7 @@ data = data.loc[data['num'] == 1, ['date_time', 'target']]
 data
 ```
 
-![data](/assets/img/posts/time_series_0/data.png)  
+![data](/assets/img/posts/time_series_1/data.png)  
 20년 6월 1일부터 20년 8월 24일까지 시간단위로 데이터가 있습니다.
 
 #### train, valid, test 구성
@@ -222,7 +222,7 @@ train, valid, test = split_data(data, CONFIGS)
 train
 ```
 
-![train](/assets/img/posts/time_series_0/train.png)  
+![train](/assets/img/posts/time_series_1/train.png)  
 
 ```python
 seqence_length = 2040 - 48  # valid와 test를 빼줬기 때문에 -48
@@ -308,7 +308,7 @@ model = set_model(CONFIGS, print_summary=True)
 history = train_model(model, train, valid, CONFIGS)
 ```
 
-![model_summary](/assets/img/posts/time_series_0/model_summary.png)  
+![model_summary](/assets/img/posts/time_series_1/model_summary.png)  
 
 best model을 load하여 test를 예측하고 성능을 비교해보겠습니다.
 
