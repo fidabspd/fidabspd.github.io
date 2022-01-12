@@ -370,7 +370,7 @@ for i in a_fm:
 
 #### batch
 
-`batch` 데이터의 차원을 하나 늘리며 특정 개수만큼씩의 데이터를 하나의 tf.Tensor 안에 묶어줍니다.  
+`batch`는 특정 개수만큼씩의 데이터를 하나의 tf.Tensor 안에 묶어줍니다.  
 앞선 예시에서 `batch`적용 전 `flat_map`까지 적용한 결과는 다음과 같습니다.
 
 ```python
