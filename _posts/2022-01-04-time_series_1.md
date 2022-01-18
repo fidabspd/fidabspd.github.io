@@ -45,16 +45,16 @@ excerpt_separator: <!--more-->
 
 ## 시계열 데이터의 특징
 
-#### 대부분 정형 데이터의 특징
+### 대부분 정형 데이터의 특징
 
 머신러닝 공부를 시작하는 단계에서 접하는 대부분의 정형 데이터들은 하나의 row가 하나의 데이터를 나타내는 경우가 많습니다. (편의상 앞으로 이런 데이터를 OneRowOneData를 축약하여 **OROD**이라고 부르도록 하겠습니다. ~~제가 방금 멋대로 정한 단어입니다.~~) 튜토리얼로 많이 사용되는 캐글의 타이타닉 생존자 예측 데이터를 보면 하나의 row가 한명의 승객정보를 담고 있고, 이를 통해 해당 승객이 생존했는지 생존하지 못했는지 예측합니다. 하나의 row에 예측을 위해 사용될 input과 예측 target 값이 모여있습니다.  
 
-#### 시계열 데이터의 One Row
+### 시계열 데이터의 One Row
 
 시계열 데이터는 하나의 row가 하나의 데이터를 나타내지 않습니다. 시간의 흐름에 따라 row 방향으로 데이터를 쌓는다면 이전 row들을 이용해 다음 row들을 예측합니다.  
 만약 본인이 위에 언급한 하나의 row가 하나의 데이터를 나타내는 데이터만 다룰 수 있는 상황이라 한들 시계열 데이터를 다룰 수 없는 것은 아닙니다. 다루기 익숙한 모양(하나의 row가 하나의 데이터)에 맞춰 데이터를 재구성 하면 됩니다.
 
-#### 시계열 데이터 OROD로 만들기
+### 시계열 데이터 OROD로 만들기
 
 앞서 말한 OROD데이터는 input과 target이 정해져있습니다. (물론 파생변수를 만들거나 target에 변형을 가하면 달라지긴 합니다.) 하지만 시계열 데이터는 input과 target에 대한 자유도가 상당히 높습니다. 이를 확실하게 구성하기 위해서는 다음과 같은 내용을 미리 정해야합니다.
 
@@ -97,9 +97,9 @@ window_size + target_length: 120 + 10 = 130
 이렇게 표현이 가능합니다.  
 혹시라도 ```((seqence_length - (window_size+target_lenght))```가 ```shift```로 나눠 떨어지지 않는 것이 걱정이라면 각 숫자를 조정하거나, 앞부분 데이터를 조금 잘라내거나, 딱 한곳의 shift만 임의로 조정함으로서 해결할 수 있습니다.
 
-## 데이터에 적용
+## CODE
 
-#### Libraries
+### Libraries
 
 ```python
 from copy import deepcopy
@@ -134,7 +134,7 @@ data
 ![data](/assets/img/posts/time_series_1/data.png)  
 20년 6월 1일부터 20년 8월 24일까지 시간단위로 데이터가 있습니다.
 
-#### train, valid, test 구성
+### train, valid, test 구성
 
 간단하게 testset은 마지막 일주일인 8월 18일 ~ 8월 24일로 하고 이를 예측하는 모델을 구성해보도록 하겠습니다.  
 그런데 validset은 어떻게 구성하면 좋을까요?  
@@ -171,6 +171,8 @@ data
 저는 **2번**방법을 사용하여 20년 8월 11일 ~ 8월 17일은 valid_data, 20년 8월 18 ~ 8월 24일일은 test_data, 나머지는 train_data로 사용하여 data를 OROD형태로 재구성 해보겠습니다.  
 (monthly 주기는 일단은 고려하지 않습니다.)  
 
+### Scaling
+
 우선 train에 사용될 데이터만을 이용해 기본적인 standard scaling을 해줍니다.  
 (추후 모델 metric 중 하나로 inverse된 target을 이용하여 rmse를 계산할 것이기 때문에 평균과 표준편차는 따로 저장해둡니다.)
 
@@ -202,6 +204,8 @@ def standard_scaling(data, mean_std_dict=None):
 
 data[scaling_cols] = standard_scaling(data[scaling_cols], mean_std_dict)
 ```
+
+### OROD
 
 다음과 같은 `window_size`, `target_length`, `shift`를 이용하여 데이터를 구성합니다.
 
@@ -283,7 +287,7 @@ print(f'총 row 수: {nrow}')
 
 계산대로 총 1534개의 row가 생긴 모습입니다.
 
-## Modeling
+### Modeling
 
 아주 간단한 NN model을 만들고 훈련해 보겠습니다.  
 
@@ -301,6 +305,8 @@ inversed_rmse_metric = lambda y_true, y_pred: inversed_rmse(y_true, y_pred, **CO
 
 참고로 model의 `compile`에 loss나 metric에 사용되는 함수의 경우 그 안의 계산 과정에서 텐서형을 계속 유지해야합니다.  
 따라서 numpy연산등을 사용하면 에러가 발생합니다.
+
+#### Set Model
 
 ```python
 def set_model(CONFIGS, model_name = None, print_summary=False):
@@ -330,6 +336,14 @@ def set_model(CONFIGS, model_name = None, print_summary=False):
     return model
 
 
+CONFIGS['model_name'] = 'super_basic'
+CONFIGS['learning_rate'] = 1e-4
+model = set_model(CONFIGS, print_summary=True)
+```
+
+### Train
+
+```python
 def train_model(model, train, valid, CONFIGS):
     
     X_train, y_train = train[CONFIGS['input_cols']], train[CONFIGS['target_cols']]
@@ -360,17 +374,16 @@ def train_model(model, train, valid, CONFIGS):
 
 
 CONFIGS['model_path'] = '../model/'
-CONFIGS['model_name'] = 'super_basic'
 CONFIGS['batch_size'] = 64
-CONFIGS['learning_rate'] = 1e-4
 CONFIGS['epochs'] = 100
 CONFIGS['es_patience'] = 10
 
-model = set_model(CONFIGS, print_summary=True)
 history = train_model(model, train, valid, CONFIGS)
 ```
 
 ![model_summary](/assets/img/posts/time_series_1/model_summary.png)  
+
+### Evaluate
 
 best model을 load하여 test를 예측하고 성능을 비교해보겠습니다.
 

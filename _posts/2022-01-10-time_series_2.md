@@ -42,9 +42,7 @@ excerpt_separator: <!--more-->
 
 ***
 
-## 데이터 구성
-
-#### Manual한 데이터 구성
+## Manual한 데이터 구성
 
 [시계열 데이터 첫번째 시리즈](https://fidabspd.github.io/2022/01/04/time_series_1.html)에서 sequential하게 주어진 시계열 데이터를 하나의 row가 하나의 데이터를 나타내는 형태로 변형하는 작업을 거쳤었습니다. 그 결과 다음과 같이 데이터를 재구성 했었죠.  
 
@@ -94,6 +92,8 @@ CONFIGS['valid_start_index'] = 1992
 train = data.loc[:CONFIGS['valid_start_index'], 'target']
 train_ds = mk_dataset(train, shuffle=True)
 ```
+
+### Functions
 
 사용한 기능들은 다음과 같습니다.
 
@@ -500,7 +500,7 @@ for i in ab_zip:
 
 이 외에도 입력 파이프라인을 최적화하는 다양한 방법들이 있습니다. 기회가 된다면 이 또한 다뤄보고 싶네요.
 
-## 실제 데이터에 적용해보기
+## 실제 데이터에 적용
 
 우선 실제 데이터는 기능을 알아보는데 사용했던 예시들과는 다르게 `X`와 `y`가 구분되어야 합니다.  
 또한 flatten을 위한 트릭으로 사용했던 batch 외에 실제로 훈련을 위한 batch를 구성해야합니다.  

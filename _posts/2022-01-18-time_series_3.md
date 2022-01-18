@@ -195,7 +195,7 @@ def standard_scaling(data, mean_std_dict=None):
 new_data[scaling_cols] = standard_scaling(new_data[scaling_cols], mean_std_dict)
 ```
 
-### Make Dataset
+### Dataset
 
 앞서 말했듯이 `temp`, `wind`, `humid` 등과 같은 `target`외의 시계열 데이터 말고도 `target time`의 정보 또한 활용해줄 예정입니다.  
 `target time`가 평일인지, 주말인지, 공휴일인지, 낮시간인지, 새벽인지 등의 정보가 전력 사용량에 영향을 미칠 것은 당연해보입니다.  
@@ -271,6 +271,8 @@ inversed_rmse_metric = lambda y_true, y_pred: inversed_rmse(y_true, y_pred, **CO
 
 참고로 model의 `compile`에 loss나 metric에 사용되는 함수의 경우 그 안의 계산 과정에서 텐서형을 계속 유지해야합니다.  
 따라서 numpy연산등을 사용하면 에러가 발생합니다.
+
+#### Set Model
 
 이제 데이터 하나당 2D-array로 들어오는 시계열 정보를 어떤 모델을 이용하여 훈련할지 정해야합니다.  
 
