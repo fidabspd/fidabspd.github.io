@@ -99,7 +99,7 @@ window_size + target_length: 120 + 10 = 130
 
 ## 데이터에 적용
 
-#### 라이브러리
+#### Libraries
 
 ```python
 from copy import deepcopy
