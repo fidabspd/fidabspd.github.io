@@ -13,9 +13,8 @@ excerpt_separator: <!--more-->
 
 1. **시계열 데이터의 기본적인 특징과 간단한 모델**
 1. tf.data.Dataset을 이용한 시계열 데이터 구성
-1. 시계열 target 외에 다른 데이터를 함께 이용
-1. 시계열 Multi-Task Learning
-1. 시계열 데이터 scaling
+1. Multi-input 시계열 모델
+1. Multi-Task Learning 시계열 모델
 1. 시계열 target의 결측
 1. 이전의 예측값을 다음의 input으로 recursive하게 이용
 
@@ -95,6 +94,7 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
+import tensorflow as tf
 from tensorflow.keras.layers import *
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
@@ -123,7 +123,7 @@ data
 
 #### train, valid, test 구성
 
-간단하게 testset은 마지막날인 8월 24일로 하고 이를 예측하는 모델을 구성해보도록 하겠습니다.  
+간단하게 testset은 마지막 일주일인 8월 18일 ~ 8월 24일로 하고 이를 예측하는 모델을 구성해보도록 하겠습니다.  
 그런데 validset은 어떻게 구성하면 좋을까요?  
 구성에 고려해야할 것은 여러가지가 있지만 크게 두가지정도만 짚겠습니다.
 
@@ -155,8 +155,42 @@ data
 
 전체적인 흐름보다 주기에 훨씬 의존적인 모습을 보인다면 **1번**을 사용할 수도 있겠습니다. 다만 대부분의 경우에 **2번**방법을 추천드립니다.
 
-저는 **2번**방법을 사용하여 20년 8월 23일은 valid_data, 20년 8월 24일은 test_data, 나머지는 train_data로 사용하여 data를 OROD형태로 재구성 해보겠습니다.  
-(weekly와 monthly 주기는 일단은 고려하지 않겠습니다.)
+저는 **2번**방법을 사용하여 20년 8월 11일 ~ 8월 17일은 valid_data, 20년 8월 18 ~ 8월 24일일은 test_data, 나머지는 train_data로 사용하여 data를 OROD형태로 재구성 해보겠습니다.  
+(monthly 주기는 일단은 고려하지 않습니다.)  
+
+우선 train에 사용될 데이터만을 이용해 기본적인 standard scaling을 해줍니다.  
+(추후 모델 metric 중 하나로 inverse된 target을 이용하여 rmse를 계산할 것이기 때문에 평균과 표준편차는 따로 저장해둡니다.)
+
+```python
+def mk_mean_std_dict(data):
+    mean_std_dict = {
+        col: {
+            'mean': data[col].mean(),
+            'std': data[col].std()
+        } for col in data.columns
+    }
+    return mean_std_dict
+
+
+scaling_cols = ['target']
+mean_std_dict = mk_mean_std_dict(data[scaling_cols][:CONFIGS['valid_start_index']])
+CONFIGS['mean_std_dict'] = mean_std_dict
+
+
+def standard_scaling(data, mean_std_dict=None):
+    if not mean_std_dict:
+        mean_std_dict = mk_mean_std_dict(data)
+    new_data = data.copy()
+    for col in new_data.columns:
+        new_data[col] -= mean_std_dict[col]['mean']
+        new_data[col] /= mean_std_dict[col]['std']
+    return new_data
+
+
+data[scaling_cols] = standard_scaling(data[scaling_cols], mean_std_dict)
+```
+
+다음과 같은 `window_size`, `target_length`, `shift`를 이용하여 데이터를 구성합니다.
 
 - ```window_size```: 7*24 (7일)
 - ```target_length```: 3 (3시간)
@@ -166,9 +200,8 @@ data
 data = data[['target']]
 
 CONFIGS = {
-    'test_lenght': 24,
-    'valid_start_index': 1992,
-    'test_start_index': 2016,
+    'valid_start_index': 1704,
+    'test_start_index': 1872,
     
     'window_size': 7*24,
     'target_length': 3,
@@ -225,21 +258,36 @@ train
 ![train](/assets/img/posts/time_series_1/train.png)  
 
 ```python
-seqence_length = 2040 - 48  # valid와 test를 빼줬기 때문에 -48
+seqence_length = 2040 - 24*7*2  # valid와 test를 빼줬기 때문에 -24*7*2
 window_size = 24*7
 target_lenght = 3
 shift = 1
 
 nrow = ((seqence_length - (window_size+target_lenght)) / shift) + 1
 print(f'총 row 수: {nrow}')
-# 총 row 수: 1822
+# 총 row 수: 1534
 ```
 
-계산대로 총 1822개의 row가 생긴 모습입니다.
+계산대로 총 1534개의 row가 생긴 모습입니다.
 
 ## Modeling
 
 아주 간단한 NN model을 만들고 훈련해 보겠습니다.  
+
+우선 model metric으로 사용할 inverse된 target을 이용한 rmse를 계산하는 함수를 만들어줍니다.
+
+```python
+def inversed_rmse(y_true, y_pred, mean, std):
+    y_true = (y_true+mean)*std
+    y_pred = (y_pred+mean)*std
+    mse = tf.reduce_mean((y_true-y_pred)**2)
+    return tf.sqrt(mse)
+
+inversed_rmse_metric = lambda y_true, y_pred: inversed_rmse(y_true, y_pred, **CONFIGS['mean_std_dict']['target'])
+```
+
+참고로 model의 `compile`에 loss나 metric에 사용되는 함수의 경우 그 안의 계산 과정에서 텐서형을 계속 유지해야합니다.  
+따라서 numpy연산등을 사용하면 에러가 발생합니다.
 
 ```python
 def set_model(CONFIGS, model_name = None, print_summary=False):
@@ -258,8 +306,9 @@ def set_model(CONFIGS, model_name = None, print_summary=False):
     
     optimizer = Adam(learning_rate=CONFIGS['learning_rate'])
     model.compile(
-        loss = 'mse',
+        loss = MeanSquaredError(),
         optimizer = optimizer,
+        metrics=[inversed_rmse_metric],
     )
     
     if print_summary:
@@ -324,19 +373,17 @@ y_train_pred = best_model.predict(X_train)
 y_valid_pred = best_model.predict(X_valid)
 y_test_pred = best_model.predict(X_test)
 
-mse = MeanSquaredError()
+train_loss, train_rmse = best_model.evaluate(X_train, y_train, verbose=0)
+valid_loss, valid_rmse = best_model.evaluate(X_valid, y_valid, verbose=0)
+test_loss, test_rmse = best_model.evaluate(X_test, y_test, verbose=0)
 
-train_loss = mse(y_train, y_train_pred).numpy()
-valid_loss = mse(y_valid, y_valid_pred).numpy()
-test_loss = mse(y_test, y_test_pred).numpy()
+print(f'train_loss: {train_loss:.6f}\ttrain_rmse: {train_rmse:.6f}')
+print(f'valid_loss: {valid_loss:.6f}\tvalid_rmse: {valid_rmse:.6f}')
+print(f'test_loss: {test_loss:.6f}\ttest_rmse: {test_rmse:.6f}')
 
-print(f'train_loss: {train_loss}')
-print(f'valid_loss: {valid_loss}')
-print(f'test_loss: {test_loss}')
-
-# train_loss: 7653.4296875
-# valid_loss: 10269.60546875
-# test_loss: 14098.6875
+# train_loss: 0.048010	train_rmse: 25.040560
+# valid_loss: 0.131389	valid_rmse: 42.938705
+# test_loss: 0.103041	test_rmse: 40.743771
 ```
 
 데이터 구성부터 간단한 모델링까지 마쳤습니다.
@@ -345,7 +392,6 @@ print(f'test_loss: {test_loss}')
 처음부터 정독하셨다면 이런저런 의문점들이 생기는 부분이 생기셨을 수 있습니다. 예상되는 것들을 적어보자면
 
 - 매번 데이터 구성을 저렇게 매뉴얼하게 할 것인가?
-- scaling은 안해도 되나?
 - testset의 시간은 24시간인데 target_length를 3으로 구성하면 알지 못한다고 가정한 testset의 target이 input으로 들어간거 아닌가?
 
 등등 외의 여러개가 있을 것으로 예상됩니다.  
@@ -356,9 +402,8 @@ print(f'test_loss: {test_loss}')
 
 1. **시계열 데이터의 기본적인 특징과 간단한 모델**
 1. tf.data.Dataset을 이용한 시계열 데이터 구성
-1. 시계열 target 외에 다른 데이터를 함께 이용
-1. 시계열 Multi-Task Learning
-1. 시계열 데이터 scaling
+1. Multi-input 시계열 모델
+1. Multi-Task Learning 시계열 모델
 1. 시계열 target의 결측
 1. 이전의 예측값을 다음의 input으로 recursive하게 이용
 
