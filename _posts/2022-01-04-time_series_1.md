@@ -26,7 +26,20 @@ excerpt_separator: <!--more-->
 
 - **본 포스팅 시리즈의 목적은 시계열 예측의 정확성을 높이기 위함이 아닙니다.**
 - **단지 시계열 데이터를 다루고 예측함에 있어 부딪히는 여러 문제들과 그를 어떻게 해결하면 좋을 지 가이드를 제시하기 위함입니다.**
-- **데이터는 [DACON 전력사용량 예측 AI 경진대회](https://dacon.io/competitions/official/235736/overview/description)의 데이터를 사용합니다.** 감사합니다 DACON
+- **데이터는 [DACON 전력사용량 예측 AI 경진대회](https://dacon.io/competitions/official/235736/overview/description)의 데이터를 사용합니다.** 감사합니다 DACON!
+    - 본 데이터가 주어진 competition은 60개의 건물에 대해 전력 수요량을 미리 예측하는 대회입니다.
+    - 데이터 column 구성은 다음과 같습니다.
+        - `num`: 건물 번호
+        - `date_time`: 데이터가 측정된 시간 (1시간 단위)
+        - `target`: 전력 사용량 (예측해야하는 값)
+        - `temp`: 기온(°C)
+        - `wind`: 풍속(m/s)
+        - `humid`: 습도(%)
+        - `rain`: 강수량(mm)
+        - `sun`: 일조(hr)
+        - `non_elec_eq`: 건물별 비전기 냉방 설비 운영 여부 (1: 보유, 0: 미보유)
+        - `sunlight_eq`: 건물별 태양광 설비 보유 여부 (1: 보유, 0: 미보유)
+    - 이번 포스팅에서는 `num`이 1인 건물의 `target` 만을 사용합니다.
 
 ***
 
