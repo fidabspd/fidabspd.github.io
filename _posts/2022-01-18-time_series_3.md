@@ -18,7 +18,7 @@ excerpt_separator: <!--more-->
 1. 시계열 target의 결측
 1. 이전의 예측값을 다음의 input으로 recursive하게 이용
 
-## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes)
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes/3_multi_input.ipynb)
 
 ***
 
@@ -434,4 +434,4 @@ target 시계열 데이터 외에 다른 변수들을 넣고 multi-input 모델�
 1. 시계열 target의 결측
 1. 이전의 예측값을 다음의 input으로 recursive하게 이용
 
-## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes)
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes/3_multi_input.ipynb)

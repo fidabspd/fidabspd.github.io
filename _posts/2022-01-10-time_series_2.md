@@ -17,7 +17,7 @@ excerpt_separator: <!--more-->
 1. 시계열 target의 결측
 1. 이전의 예측값을 다음의 input으로 recursive하게 이용
 
-## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes)
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes/2_tf_dataset.ipynb)
 
 ***
 
@@ -543,4 +543,4 @@ def mk_dataset(data, shuffle=False):
 1. 시계열 target의 결측
 1. 이전의 예측값을 다음의 input으로 recursive하게 이용
 
-## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes)
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes/2_tf_dataset.ipynb)

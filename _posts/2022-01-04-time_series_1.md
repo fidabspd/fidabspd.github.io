@@ -18,7 +18,7 @@ excerpt_separator: <!--more-->
 1. 시계열 target의 결측
 1. 이전의 예측값을 다음의 input으로 recursive하게 이용
 
-## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes)
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes/1_super_basic.ipynb)
 
 ***
 
@@ -433,4 +433,4 @@ print(f'test_loss: {test_loss:.6f}\ttest_rmse: {test_rmse:.6f}')
 1. 시계열 target의 결측
 1. 이전의 예측값을 다음의 input으로 recursive하게 이용
 
-## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes)
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes/1_super_basic.ipynb)
