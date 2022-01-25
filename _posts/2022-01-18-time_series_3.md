@@ -261,8 +261,8 @@ test_ds = mk_dataset(test, CONFIGS)
 
 ```python
 def inversed_rmse(y_true, y_pred, mean, std):
-    y_true = (y_true+mean)*std
-    y_pred = (y_pred+mean)*std
+    y_true = y_true*std+mean
+    y_pred = y_pred*std+mean
     mse = tf.reduce_mean((y_true-y_pred)**2)
     return tf.sqrt(mse)
 
@@ -415,9 +415,9 @@ print(f'train_loss: {train_loss:.6f}\ttrain_rmse: {train_rmse:.6f}')
 print(f'valid_loss: {valid_loss:.6f}\tvalid_rmse: {valid_rmse:.6f}')
 print(f'test_loss: {test_loss:.6f}\ttest_rmse: {test_rmse:.6f}')
 
-# train_loss: 0.048410	train_rmse: 26.699608
-# valid_loss: 0.296340	valid_rmse: 64.019402
-# test_loss: 0.176139	test_rmse: 52.172211
+# train_loss: 0.028937	train_rmse: 20.117674
+# valid_loss: 0.298460	valid_rmse: 67.695808
+# test_loss: 0.203631	test_rmse: 55.200130
 ```
 
 target 시계열 데이터 외에 다른 변수들을 넣고 multi-input 모델을 완성하였습니다.  

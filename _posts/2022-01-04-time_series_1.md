@@ -295,8 +295,8 @@ print(f'총 row 수: {nrow}')
 
 ```python
 def inversed_rmse(y_true, y_pred, mean, std):
-    y_true = (y_true+mean)*std
-    y_pred = (y_pred+mean)*std
+    y_true = y_true*std+mean
+    y_pred = y_pred*std+mean
     mse = tf.reduce_mean((y_true-y_pred)**2)
     return tf.sqrt(mse)
 
@@ -407,9 +407,9 @@ print(f'train_loss: {train_loss:.6f}\ttrain_rmse: {train_rmse:.6f}')
 print(f'valid_loss: {valid_loss:.6f}\tvalid_rmse: {valid_rmse:.6f}')
 print(f'test_loss: {test_loss:.6f}\ttest_rmse: {test_rmse:.6f}')
 
-# train_loss: 0.048010	train_rmse: 25.040560
-# valid_loss: 0.131389	valid_rmse: 42.938705
-# test_loss: 0.103041	test_rmse: 40.743771
+# train_loss: 0.048540	train_rmse: 25.183891
+# valid_loss: 0.142397	valid_rmse: 45.505894
+# test_loss: 0.125447	test_rmse: 46.547405
 ```
 
 데이터 구성부터 간단한 모델링까지 마쳤습니다.
