@@ -224,8 +224,11 @@ CONFIGS['target_cols'] = target_cols
 
 def mk_dataset(data, CONFIGS, shuffle=False):
     
+    h = CONFIGS['target_length']//2
+    
     time_series = data[CONFIGS['time_series_cols']][:-CONFIGS['target_length']]
-    target_time_info = data[CONFIGS['target_time_info_cols']][CONFIGS['window_size']+1:-(CONFIGS['target_length']-2)]
+    target_time_info = data[CONFIGS['target_time_info_cols']]\
+        [CONFIGS['window_size']+h:data.shape[0]-CONFIGS['target_length']+1+h]
     target = data[CONFIGS['target_cols']][CONFIGS['window_size']:]
     
     time_series_ds = Dataset.from_tensor_slices(time_series)
