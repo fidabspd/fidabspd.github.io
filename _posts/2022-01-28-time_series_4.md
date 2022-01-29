@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Time Series - Multi-Task Learning 시계열 모델
+title: Time Series - Multi-Task Learning 시계열 모델 (1)
 tags: [Time-Series, Tensorflow, Keras]
 excerpt_separator: <!--more-->
 ---
