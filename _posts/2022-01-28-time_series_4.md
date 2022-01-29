@@ -519,7 +519,7 @@ print(train_ds)
 <PrefetchDataset shapes: (((None, 1), (None, 7), (None, 11), (None, None, 12), (None, 2)), (None, None, 1)), types: ((tf.int16, tf.float32, tf.float32, tf.float32, tf.float32), tf.float32)>
 ```
 
-## 분량 조절 실패로 Multi-task learning Modeling 파트는 2부에서 계속..
+## 분량 조절 실패로 Modeling 파트는 2부에서 계속..
 
 ## 목차
 

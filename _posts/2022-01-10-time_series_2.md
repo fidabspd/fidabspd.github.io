@@ -5,7 +5,7 @@ tags: [Time-Series, Tensorflow, Keras]
 excerpt_separator: <!--more-->
 ---
 
-시계열 시리즈의 첫번째. [시계열 데이터의 기본적인 특징과 간단한 모델](https://fidabspd.github.io/2022/01/04/time_series_1.html)에서 기본적인 시계열 데이터의 특징을 알아보고 간단한 모델을 만들었다.  
+[시계열 데이터의 기본적인 특징과 간단한 모델](https://fidabspd.github.io/2022/01/04/time_series_1.html)에서 기본적인 시계열 데이터의 특징을 알아보고 간단한 모델을 만들었다.  
 이에 이어 시리즈의 두번째 내용으로 tf.data.Dataset의 전체적인 설명과 이를 이용한 데이터 구성을 해보자. <!--more-->
 
 ## 목차
