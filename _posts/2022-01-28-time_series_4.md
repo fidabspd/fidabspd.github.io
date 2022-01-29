@@ -12,7 +12,7 @@ excerpt_separator: <!--more-->
 
 1. 시계열 데이터의 기본적인 특징과 간단한 모델
 1. tf.data.Dataset을 이용한 시계열 데이터 구성
-1. Multi-input 시계열 모델
+1. Multi-Input 시계열 모델
 1. **Multi-Task Learning 시계열 모델 (1)**
 1. Multi-Task Learning 시계열 모델 (2)
 1. 시계열 target의 결측
@@ -525,7 +525,7 @@ print(train_ds)
 
 1. 시계열 데이터의 기본적인 특징과 간단한 모델
 1. tf.data.Dataset을 이용한 시계열 데이터 구성
-1. Multi-input 시계열 모델
+1. Multi-Input 시계열 모델
 1. **Multi-Task Learning 시계열 모델 (1)**
 1. Multi-Task Learning 시계열 모델 (2)
 1. 시계열 target의 결측
