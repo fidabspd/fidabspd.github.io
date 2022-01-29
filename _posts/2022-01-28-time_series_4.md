@@ -13,7 +13,8 @@ excerpt_separator: <!--more-->
 1. 시계열 데이터의 기본적인 특징과 간단한 모델
 1. tf.data.Dataset을 이용한 시계열 데이터 구성
 1. Multi-input 시계열 모델
-1. **Multi-Task Learning 시계열 모델**
+1. **Multi-Task Learning 시계열 모델 (1)**
+1. Multi-Task Learning 시계열 모델 (2)
 1. 시계열 target의 결측
 1. 이전의 예측값을 다음의 input으로 recursive하게 이용
 
@@ -477,7 +478,7 @@ array([[ 1.        ,  0.        , -0.78192177, ...,  0.        ,
 - 필요하다면 `shuffle`을 이용한다.
 - `batch`, `cache`, `prefetch`를 적용한다. (하나 건물의 sequence가 현재 약 1500이 넘기 때문에 `shuffle`의 `buffer_size`를 이보다는 늘려주는 것이 좀 더 잘 shuffle하는 것이지만 일단은 그냥 진행.)
 
-#### Train, Valid, Test Split & Apply
+#### Train, Valid, Test Split & Apply mk_dataset
 
 ```python
 str_to_dt = lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H')
@@ -518,4 +519,16 @@ print(train_ds)
 <PrefetchDataset shapes: (((None, 1), (None, 7), (None, 11), (None, None, 12), (None, 2)), (None, None, 1)), types: ((tf.int16, tf.float32, tf.float32, tf.float32, tf.float32), tf.float32)>
 ```
 
-## 분량 조절 실패로 Multi-task learning은 2부에서 계속..
+## 분량 조절 실패로 Multi-task learning Modeling 파트는 2부에서 계속..
+
+## 목차
+
+1. 시계열 데이터의 기본적인 특징과 간단한 모델
+1. tf.data.Dataset을 이용한 시계열 데이터 구성
+1. Multi-input 시계열 모델
+1. **Multi-Task Learning 시계열 모델 (1)**
+1. Multi-Task Learning 시계열 모델 (2)
+1. 시계열 target의 결측
+1. 이전의 예측값을 다음의 input으로 recursive하게 이용
+
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/tree/master/codes/4_multi_task_learning.ipynb)
