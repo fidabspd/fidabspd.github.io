@@ -276,6 +276,9 @@ inversed_rmse_metric = lambda y_true, y_pred: inversed_rmse(y_true, y_pred, **CO
 참고로 model의 `compile`에 loss나 metric에 사용되는 함수의 경우 그 안의 계산 과정에서 텐서형을 계속 유지해야한다.  
 따라서 numpy연산등을 사용하면 에러가 발생한다.
 
+사실 지금 만든 custom metric은 약간의 잘못된 점이 있다.  
+Metric을 보다 정확하게 customize하는 방법에 대해서는 이어지는 [Multi-Task Learning 시계열 모델 (2)](https://fidabspd.github.io/2022/01/30/time_series_4-2.html)에서 자세히 다뤄보도록 하겠다.
+
 #### Set Model
 
 이제 데이터 하나당 2D-array로 들어오는 시계열 정보를 어떤 모델을 이용하여 훈련할지 결정해야한다.  
