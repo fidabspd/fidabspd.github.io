@@ -273,7 +273,12 @@ def standard_scaling(data, scaling_by_building_cols, scaling_by_all_cols, mean_s
 new_data = standard_scaling(new_data, scaling_by_building_cols, scaling_by_all_cols, mean_std_dict)
 ```
 
+scaling은 결측값을 채우기 이전의 값으로 진행한다.
+
 ### Visualize
+
+결측값을 어떻게 채울 지 결정하기 위해 train에 사용할 데이터만을 이용하여 간단한 시각화를 진행한다.  
+요일별, 시간별, 일별 `target`의 평균을 시각화 한다.
 
 ```python
 def visualize(data):
@@ -320,6 +325,14 @@ def visualize(data):
 visualize(new_data)
 ```
 
+![target_visual](/assets/img/posts/time_series_5/target_visual.png)
+
+위 데이터에서 볼 수 있듯 대부분의 시계열 데이터는 요일, 시간, 날짜 등의 변수들에 굉장히 의존적이다.  
+현재는 multi-task learning을 진행중이므로 건물별 특징 또한 포함시켜야한다.  
+따라서 단순히 column의 평균을 이용한 결측값 대체는 곧 이상값을 집어넣는 격이 되는 경우가 많다.  
+
+결측값이 어떻게 분포하는지도 살펴보도록 하자.
+
 ```python
 def visualize_na_rate(data):
     eda_df = data.copy()
@@ -340,7 +353,17 @@ def visualize_na_rate(data):
 visualize_na_rate(new_data)
 ```
 
+![na_dist](/assets/img/posts/time_series_5/na_dist.png)
+
+그냥 무작위로 결측값을 만들었기 때문에 건물번호, 날짜, 시간, 요일, 휴일여부 등에 관계 없이 고르게 결측값이 분포하는 모습이 보인다.  
+만약 그렇지 않고 특정한 곳에만 결측값이 몰려있다면 해당 결측값을 더 잘 채우기위해 고민해야한다.  
+간단하게 예를들어 00시~06시의 데이터에만 결측값이 연속한 형태로 몰려있다면 단순한 선형 interpolation은 적절하지 않은 결측값 대체이다.
+
 ### Fill Missing Value
+
+본 포스팅에서는 결측값이 고르게 분포해있기 때문에 선형 interpolation([wikipedia 참고](https://en.wikipedia.org/wiki/Linear_interpolation))을 진행하고, 각 건물의 `target` 시퀀스의 시작에 결측이 있다면 가장 가까운 실제 값으로 채우도록 한다.  
+또한 해당 `target`값이 진짜 true값인지, 선형 보간된 값인지를 구분하는 column을 데이터에 추가한다.
+(실제 결측값을 대체할 때는 보다 깊은 데이터에 대한 이해를 바탕으로 진행해야한다.)
 
 ```python
 def fill_missing_value(data):
@@ -360,6 +383,9 @@ new_data = fill_missing_value(new_data)
 ### Dataset
 
 #### Input Columns
+
+결측값이 참인지 거짓인지 구분하기 위한 column인 `is_true`도 포함한다.  
+이는 모델의 독립변수로도 활용할 예정이며, 본 포스팅의 시작에서 말했던 loss를 계산한 이후 backpropagation을 진행할지 여부를 결정하는 데에도 사용할 예정이다.
 
 ```python
 building_num_cols = ['num']
@@ -510,6 +536,12 @@ test_ds = mk_dataset(test, CONFIGS)
 
 ### Customize Loss & Metric
 
+본 포스팅의 시작에서 말했던 loss를 계산한 이후 backpropagation을 진행할지 여부를 결정하는, 본 포스팅의 가장 핵심이 되는 부분이다.  
+`Loss`와 `Metric`을 custom하는 방법은 이전 포스팅에서 다뤘으므로 사실 어렵진 않다.  
+각 데이터에서 계산된 loss에 `is_true`를 곱해주는 방식으로 간단하게 구현이 가능하다.  
+
+만약 `target`이 실제 데이터가 아니라 선형보간된 값이라면 loss는 0이되어 해당 데이터로는 backpropagation을 진행하지 않는다.
+
 ```python
 class CustomMSE(Loss):
     
@@ -530,8 +562,11 @@ class CustomMSE(Loss):
 
         mse = tf.reduce_mean((y_true_inversed_scaled-y_pred_inversed_scaled)**2)
         return mse
+```
 
+`Metric`도 마찬가지로 선형보간 된 `target`을 잘 맞췄는지는 중요하지 않으므로 해당 데이터를 이용한 metirc역시 0으로 바꿔준다.
 
+```python
 class InversedRMSE(Metric):
     
     def __init__(self, CONFIGS, name="inversed_rmse", **kwargs):
@@ -808,6 +843,67 @@ CONFIGS['embedding_dim'] = 10
 model = set_model(CONFIGS, print_summary=True)
 ```
 
+```
+Model: "handling_missing_value"
+__________________________________________________________________________________________________
+ Layer (type)                   Output Shape         Param #     Connected to                     
+==================================================================================================
+ building_num_inputs (InputLaye  [(None, 1)]         0           []                               
+ r)                                                                                               
+                                                                                                  
+ building_info_inputs (InputLay  [(None, 7)]         0           []                               
+ er)                                                                                              
+                                                                                                  
+ target_time_info_inputs (Input  [(None, 11)]        0           []                               
+ Layer)                                                                                           
+                                                                                                  
+ time_series_inputs (InputLayer  [(None, 168, 13)]   0           []                               
+ )                                                                                                
+                                                                                                  
+ building_num_layer (BuildingNu  (None, 10)          600         ['building_num_inputs[0][0]']    
+ m)                                                                                               
+                                                                                                  
+ building_info_layer (BuildingI  (None, 32)          672         ['building_info_inputs[0][0]']   
+ nfo)                                                                                             
+                                                                                                  
+ target_time_info_layer (Target  (None, 32)          736         ['target_time_info_inputs[0][0]']
+ TimeInfo)                                                                                        
+                                                                                                  
+ time_series_layer (TimeSeries)  (None, 320)         2208        ['time_series_inputs[0][0]']     
+                                                                                                  
+ concat (Concatenate)           (None, 394)          0           ['building_num_layer[0][0]',     
+                                                                  'building_info_layer[0][0]',    
+                                                                  'target_time_info_layer[0][0]', 
+                                                                  'time_series_layer[0][0]']      
+                                                                                                  
+ dense_0 (Dense)                (None, 64)           25280       ['concat[0][0]']                 
+                                                                                                  
+ dropout_0 (Dropout)            (None, 64)           0           ['dense_0[0][0]']                
+                                                                                                  
+ dense_1 (Dense)                (None, 32)           2080        ['dropout_0[0][0]']              
+                                                                                                  
+ dense_2 (Dense)                (None, 3)            99          ['dense_1[0][0]']                
+                                                                                                  
+ reshape_dense (Reshape)        (None, 3, 1)         0           ['dense_2[0][0]']                
+                                                                                                  
+ to_inverse_inputs (InputLayer)  [(None, 3, 2)]      0           []                               
+                                                                                                  
+ is_true_inputs (InputLayer)    [(None, 3, 1)]       0           []                               
+                                                                                                  
+ concat_to_inverse (Concatenate  (None, 3, 4)        0           ['reshape_dense[0][0]',          
+ )                                                                'to_inverse_inputs[0][0]',      
+                                                                  'is_true_inputs[0][0]']         
+                                                                                                  
+==================================================================================================
+Total params: 31,675
+Trainable params: 31,675
+Non-trainable params: 0
+__________________________________________________________________________________________________
+```
+
+최종 `Dense`레이어를 지나고난 뒤, scaling을 inverse해주기 위한 `to_inverse_inputs`와 target 값이 선형 보간된 값인지 판단하기 위한 `is_true_inputs`를 `Concatenate`해준다.  
+모델의 최종 output의 shape은 `(None, 3, 4)`가 된다. (`(batch_size, target_length, [pred, mean, std, is_true])`)
+
 #### Train
 
 ```python
@@ -858,3 +954,26 @@ print(f'train_loss: {train_loss:.6f}\ttrain_rmse: {train_rmse:.6f}')
 print(f'valid_loss: {valid_loss:.6f}\tvalid_rmse: {valid_rmse:.6f}')
 print(f'test_loss: {test_loss:.6f}\ttest_rmse: {test_rmse:.6f}')
 ```
+
+```
+train_loss: 0.000177	train_rmse: 224.546661
+valid_loss: 0.000667	valid_rmse: 435.688721
+test_loss: 0.000498	test_rmse: 376.542938
+```
+
+이렇게 결측값이 있는 시계열 데이터를 이용하여 1보다 큰 `target_length`를 가지는 모델을 완성하였다. 
+
+양이 좀 많지만 반복된 내용이 거의 대부분이라 하나의 포스팅으로 구성했다.  
+다음 포스팅에서는 `target`의 예측값을 recursive하게 다시 `input`으로 집어넣는 방법에 대해 다뤄보자.
+
+## 목차
+
+1. 시계열 데이터의 기본적인 특징과 간단한 모델
+1. tf.data.Dataset을 이용한 시계열 데이터 구성
+1. Multi-Input 시계열 모델
+1. Multi-Task Learning 시계열 모델 (1)
+1. Multi-Task Learning 시계열 모델 (2)
+1. **시계열 target의 결측**
+1. 이전의 예측값을 다음의 input으로 recursive하게 이용
+
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/blob/master/codes/5_handling_missing_value.ipynb)
