@@ -12,7 +12,8 @@ excerpt_separator: <!--more-->
 1. `target_length`를 일주일로 늘린다.
 2. 모델의 예측값을 다시 input으로 넣어가며 recursive하게 데이터를 구성한다.
 
-이중에서 1번 방법은 `target_length = 7*24` 해주면 그만이므로 다루지 않기로 하고, 2번 방법을 다뤄보도록 하자.
+이중에서 1번 방법은 `target_length = 7*24` 해주면 그만이므로 다루지 않기로 하고, 2번 방법을 다뤄보도록 하자.  
+(앞으로 2번 방법을 **rolling prediction**이라고 부르도록 한다. 완벽하게 정의된 단어는 아니지만 이렇게 지칭하면 대부분 의사소통에는 문제가 없다.)
 
 ## 목차
 
@@ -58,6 +59,9 @@ excerpt_separator: <!--more-->
 하지만 본 포스팅의 목적은 시계열 데이터를 이용하여 모델을 만드는 과정에서 마주하는 다양한 어려움들을 어떻게 해결하면 좋을지에 대해 정리하는 내용이기 때문에 **1번** 방법보다는 더 어려운 방법인 **2번** 방법을 써보도록 하자.
 
 ## CODE
+
+[tf.data.Dataset 구성](#dataset) 이전 코드는 [Multi-Task Learning 시계열 모델](https://fidabspd.github.io/2022/01/28/time_series_4-1.html)과 거의 유사하다.  
+따라서 설명은 생략.
 
 ### Libraries
 
@@ -125,35 +129,738 @@ CONFIGS['last_date_time'] = data['date_time'].max()
 CONFIGS['n_buildings'] = len(data['num'].unique())
 ```
 
-### 결측값 추가
-
 ### 시간 데이터 가공
+
+```python
+def mk_time_data(data):
+    
+    new_data = data.copy()
+
+    new_data['date_time'] = data['date_time'].apply(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H'))
+    
+    new_data['time_stamp'] = new_data['date_time'].apply(lambda x: x.timestamp())
+    
+    new_data['year'] = new_data['date_time'].apply(lambda x: x.year)
+    new_data['month'] = new_data['date_time'].apply(lambda x: x.month)
+    new_data['day'] = new_data['date_time'].apply(lambda x: x.day)
+    
+    new_data['hour'] = new_data['date_time'].apply(lambda x: x.hour)
+    new_data['cos_hour'] = np.cos(2*np.pi*(new_data['hour']/24))
+    new_data['sin_hour'] = np.sin(2*np.pi*(new_data['hour']/24))
+
+    new_data['weekday'] = new_data['date_time'].apply(lambda x: x.weekday())
+    new_data['cos_weekday'] = np.cos(2*np.pi*(new_data['weekday']/7))
+    new_data['sin_weekday'] = np.sin(2*np.pi*(new_data['weekday']/7))
+    
+    new_data['is_holiday'] = 0
+    new_data.loc[(new_data['weekday'] == 5) | (new_data['weekday'] == 6), 'is_holiday'] = 1
+    new_data.loc[(new_data['month'] == 8) & (new_data['day'] == 17), 'is_holiday'] = 1
+    
+    return new_data
+
+
+new_data = mk_time_data(data)
+```
 
 ### Make Building Info
 
+```python
+def mk_building_info(data, data_for_calc, CONFIGS):
+        
+    new_data = data.copy()
+    new_data['range'] = 0
+    new_data['mean'] = 0
+    new_data['std'] = 0
+    new_data['holiday_gap'] = 0
+    new_data['day_gap'] = 0
+
+    for num in range(CONFIGS['n_buildings']):
+        building = data_for_calc.query(f'num == {num}')
+        
+        bt_range = building['target'].max()-building['target'].min()
+        bt_mean = building['target'].mean()
+        bt_std = building['target'].std()
+        bt_holiday_gap = abs(building.query('is_holiday == 0')['target'].mean() - building.query('is_holiday == 1')['target'].mean())
+        bt_day_gap = 0
+        for d in range(building.shape[0]//24):
+            tmp = building['target'][d*24:(d+1)*24]
+            bt_day_gap += (tmp.max()-tmp.min())/(building.shape[0]//24)
+            
+        new_data.loc[new_data['num']==num, 'range'] = bt_range
+        new_data.loc[new_data['num']==num, 'mean'] = bt_mean
+        new_data.loc[new_data['num']==num, 'std'] = bt_std
+        new_data.loc[new_data['num']==num, 'holiday_gap'] = bt_holiday_gap
+        new_data.loc[new_data['num']==num, 'day_gap'] = bt_day_gap
+        
+    new_data['mean_to_inverse'] = new_data['mean']
+    new_data['std_to_inverse'] = new_data['std']
+        
+    return new_data
+
+
+new_data = mk_building_info(
+    new_data,
+    new_data[new_data['date_time']<CONFIGS['valid_start_date_time']],
+    CONFIGS
+)
+```
+
 ### Scaling
 
-### Visualize
+```python
+def mk_mean_std_dict(data, scaling_by_building_cols):
+    mean_std_dict = {}
+    for num in range(60):
+        building = data.query(f'num == {num}')
+        mean_std_dict[num] = {
+            col: {
+                'mean': building[col].mean(),
+                'std': building[col].std()
+            } for col in scaling_by_building_cols
+        }
+    return mean_std_dict
 
-### Fill Missing Value
+
+scaling_by_building_cols = [
+    'temp', 'wind', 'humid', 'rain', 'sun', 'time_stamp', 'target',
+]
+scaling_by_all_cols = ['range', 'mean', 'std', 'holiday_gap', 'day_gap']
+
+mean_std_dict = mk_mean_std_dict(
+    new_data[new_data['date_time'] < CONFIGS['valid_start_date_time']],
+    scaling_by_building_cols
+)
+CONFIGS['mean_std_dict'] = mean_std_dict
+
+
+def standard_scaling(data, scaling_by_building_cols, scaling_by_all_cols, mean_std_dict=None):
+    if not mean_std_dict:
+        mean_std_dict = mk_mean_std_dict(data, scaling_by_building_cols)
+        
+    new_data = data.copy()
+    for num in range(60):
+        for col in scaling_by_building_cols:
+            new_data.loc[new_data['num']==num, col] -= mean_std_dict[num][col]['mean']
+            new_data.loc[new_data['num']==num, col] /= mean_std_dict[num][col]['std']
+    
+    for col in scaling_by_all_cols:
+        m = new_data.loc[:, col].mean()
+        s = new_data.loc[:, col].std()
+        new_data.loc[:, col] -= m
+        new_data.loc[:, col] /= s
+    
+    return new_data
+
+
+new_data = standard_scaling(new_data, scaling_by_building_cols, scaling_by_all_cols, mean_std_dict)
+```
 
 ### Dataset
 
 #### Input Columns
 
+```python
+building_num_cols = ['num']
+building_info_cols = [
+    'range', 'mean', 'std', 'holiday_gap', 'day_gap',
+    'non_elec_eq', 'sunlight_eq',
+]
+target_time_info_cols = [
+    'temp', 'wind', 'humid', 'rain', 'sun', 'time_stamp',
+    'cos_hour', 'sin_hour', 'cos_weekday', 'sin_weekday',
+    'is_holiday',
+]
+time_series_cols = [
+    'temp', 'wind', 'humid', 'rain', 'sun', 'time_stamp',
+    'cos_hour', 'sin_hour', 'cos_weekday', 'sin_weekday',
+    'is_holiday', 'target',
+]
+target_cols = ['target']
+to_inverse_cols = ['mean_to_inverse', 'std_to_inverse']
+input_cols = list(set(
+    building_num_cols + building_info_cols + target_time_info_cols +
+    time_series_cols + target_cols + to_inverse_cols
+))
+
+CONFIGS['building_num_cols'] = building_num_cols
+CONFIGS['building_info_cols'] = building_info_cols
+CONFIGS['target_time_info_cols'] = target_time_info_cols
+CONFIGS['time_series_cols'] = time_series_cols
+CONFIGS['target_cols'] = target_cols
+CONFIGS['to_inverse_cols'] = to_inverse_cols
+CONFIGS['input_cols'] = input_cols
+```
+
 #### Make tf.data.Dataset
+
+여기까지는 [Multi-Task Learning 시계열 모델](https://fidabspd.github.io/2022/01/28/time_series_4-1.html)과 비교해서 사소한 수정사항들 외에는 차이가 없다고 봐도 무방하다.  
+`tf.data.Dataset`을 만드는 시점부터 이전 시리즈들과 차이가 생기기 시작한다.
+
+앞선 시계열 시리즈들에서는 `Dataset`을 구성할 때 data를 먼저 건물 단위로 나누고, 그 안에서 `flat_map`, `map` 등을 이용하여 건물별로 window를 구성하였다.  
+하지만 그렇게 데이터를 구성할 경우 데이터를 `shuffle` 해주지 않으면 데이터의 순서는 0번 건물이 먼저 다 나온 뒤 1번...59번 까지 반복된다. 이렇게 데이터를 구성할 경우 rolling prediction(recursive 하게 input활용)을 수행하기에 불편함이 많다. 
+
+그래서 현재는 데이터를 건물별 sort된 순서가 아닌, date_time별로 sort된 순서로 데이터를 이용하도록 하자. 이렇게 하면 첫날의 60개 건물에 대한 데이터가 나오고 그 다음날의 60개 건물... 순서로 데이터가 나오게 된다.  
+이렇게 데이터를 구성하는 key는 `window`의 `stride`이다.
+
+```python
+def mk_time_series(data, CONFIGS, is_input=False, is_time_series=False):
+    if is_input:
+        data = data[:-CONFIGS['target_length']*CONFIGS['n_buildings']]
+    else:
+        data = data[CONFIGS['window_size']*CONFIGS['n_buildings']:]
+    ds = Dataset.from_tensor_slices(data)
+    if is_time_series:
+        if is_input:
+            size = CONFIGS['window_size']
+        else:
+            size = CONFIGS['target_length']
+        ds = ds.window(
+            size=size, shift=CONFIGS['shift'],
+            stride=CONFIGS['n_buildings'], drop_remainder=True
+        )
+        ds = ds.flat_map(lambda x: x).batch(size)
+    return ds
+
+
+def mk_dataset(data, CONFIGS, batch_size=None, shuffle=False):
+    
+    if not batch_size:
+        batch_size = CONFIGS['batch_size']
+    
+    data = data.sort_values(['date_time', 'num'])
+
+    building_num = data[CONFIGS['building_num_cols']]
+    building_info = data[CONFIGS['building_info_cols']]
+    target_time_info = data[CONFIGS['target_time_info_cols']]
+    time_series = data[CONFIGS['time_series_cols']]
+    to_inverse = data[CONFIGS['to_inverse_cols']]
+    target = data[CONFIGS['target_cols']]
+
+    building_num_ds = mk_time_series(building_num, CONFIGS)
+    building_info_ds = mk_time_series(building_info, CONFIGS)
+    target_time_info_ds = mk_time_series(target_time_info, CONFIGS)
+    time_series_ds = mk_time_series(time_series, CONFIGS, is_input=True, is_time_series=True)
+    to_inverse_ds = mk_time_series(to_inverse, CONFIGS)
+    target_ds = mk_time_series(target, CONFIGS, is_time_series=True)
+
+    ds = Dataset.zip((
+        (
+            building_num_ds,
+            building_info_ds,
+            target_time_info_ds,
+            time_series_ds,
+            to_inverse_ds
+        ),
+        target_ds
+    ))
+    if shuffle:
+        ds = ds.shuffle(CONFIGS['buffer_size'])
+    ds = ds.batch(batch_size).prefetch(2)
+    
+    return ds
+
+
+str_to_dt = lambda x: datetime.datetime.strptime(x, '%Y-%m-%d %H')
+hour_to_td = lambda x: datetime.timedelta(hours=x)
+
+train = new_data.loc[
+    new_data['date_time'] < \
+        str_to_dt(CONFIGS['valid_start_date_time']),
+    :
+]
+valid = new_data.loc[
+    (new_data['date_time'] >= \
+        str_to_dt(CONFIGS['valid_start_date_time'])-hour_to_td(CONFIGS['window_size']))&\
+    (new_data['date_time'] < \
+         str_to_dt(CONFIGS['test_start_date_time'])),
+    :
+]
+test = new_data.loc[
+    new_data['date_time'] >= \
+        str_to_dt(CONFIGS['test_start_date_time'])-hour_to_td(CONFIGS['window_size']),
+    :
+]
+
+train_ds = mk_dataset(train, CONFIGS, shuffle=True)
+valid_ds = mk_dataset(valid, CONFIGS, batch_size=CONFIGS['n_buildings'])
+test_ds = mk_dataset(test, CONFIGS, batch_size=CONFIGS['n_buildings'])
+```
 
 ### Modeling
 
-### Customize Loss & Metric
+#### Customize Loss & Metric
+
+```python
+class CustomMSE(Loss):
+    
+    def __init__(self, target_max, name="custom_mse"):
+        super(CustomMSE, self).__init__(name=name)
+        self.target_max = target_max
+
+    def call(self, y_true, y_pred):
+        y_true = tf.squeeze(y_true)
+        mean = tf.reshape(y_pred[:, -2], (-1, 1))
+        std = tf.reshape(y_pred[:, -1], (-1, 1))
+        y_pred = y_pred[:, :-2]
+
+        y_true_inversed = y_true*std+mean
+        y_pred_inversed = y_pred*std+mean
+        
+        y_true_inversed_scaled = y_true_inversed/self.target_max
+        y_pred_inversed_scaled = y_pred_inversed/self.target_max
+
+        mse = tf.reduce_mean((y_true_inversed_scaled-y_pred_inversed_scaled)**2)
+        return mse
+
+    
+class InversedRMSE(Metric):
+    
+    def __init__(self, CONFIGS, name="inversed_rmse", **kwargs):
+        super(InversedRMSE, self).__init__(name=name, **kwargs)
+        self.inversed_mse = self.add_weight(name='inversed_mse', initializer='zeros')
+        self.count = self.add_weight(name='count', initializer='zeros')
+        self.CONFIGS = CONFIGS
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        y_true = tf.reshape(y_true, (-1, CONFIGS['target_length']))
+        mean = tf.reshape(y_pred[:, -2], (-1, 1))
+        std = tf.reshape(y_pred[:, -1], (-1, 1))
+        y_pred = y_pred[:, :-2]
+
+        y_true_inversed = y_true*std+mean
+        y_pred_inversed = y_pred*std+mean
+
+        error = tf.reduce_sum(tf.math.squared_difference(y_true_inversed, y_pred_inversed))
+        
+        self.inversed_mse.assign_add(error)
+        self.count.assign_add(tf.cast(tf.size(y_true), CONFIGS['dtype']))
+
+    def result(self):
+        return tf.sqrt(tf.math.divide_no_nan(self.inversed_mse, self.count))
+```
 
 #### Customize Layer
 
+```python
+class BuildingNum(Layer):
+
+    def __init__(self, CONFIGS, name='building_num_layer', **kwargs):
+        super(BuildingNum, self).__init__(name=name, **kwargs)
+        self.building_num_emb = Embedding(
+            input_dim=CONFIGS['n_buildings'],
+            output_dim=CONFIGS['embedding_dim']
+        )
+        self.bn_outputs = Reshape(target_shape=(CONFIGS['embedding_dim'],))
+        
+    def get_config(self):
+        config = super(BuildingNum, self).get_config().copy()
+        config.update({
+            'building_num_emb': self.building_num_emb,
+            'bn_outputs': self.bn_outputs,
+        })
+        return config
+        
+    def call(self, inputs):
+        x = self.building_num_emb(inputs)
+        outputs = self.bn_outputs(x)
+        return outputs
+    
+
+class BuildingInfo(Layer):
+    
+    def __init__(self, CONFIGS, name='building_info_layer', **kwargs):
+        super(BuildingInfo, self).__init__(name=name, **kwargs)
+        self.bi_dense_0 = Dense(16, activation='relu')
+        self.dropout_0 = Dropout(0.3)
+        self.bi_outputs = Dense(32, activation='relu')
+        
+    def get_config(self):
+        config = super(BuildingInfo, self).get_config().copy()
+        config.update({
+            'bi_dense_0': self.bi_dense_0,
+            'dropout_0': self.dropout_0,
+            'bi_outputs': self.bi_outputs,
+        })
+        return config
+        
+    def call(self, inputs):
+        x = self.bi_dense_0(inputs)
+        x = self.dropout_0(x)
+        outputs = self.bi_outputs(x)
+        return outputs
+    
+
+class TargetTimeInfo(Layer):
+    
+    def __init__(self, CONFIGS, name='target_time_info_layer', **kwargs):
+        super(TargetTimeInfo, self).__init__(name=name, **kwargs)
+        self.tti_dense_0 = Dense(16, activation='relu')
+        self.dropout_0 = Dropout(0.3)
+        self.tti_outputs = Dense(32, activation='relu')
+        
+    def get_config(self):
+        config = super(TargetTimeInfo, self).get_config().copy()
+        config.update({
+            'tti_dense_0': self.tti_dense_0,
+            'dropout_0': self.dropout_0,
+            'tti_outputs': self.tti_outputs,
+        })
+        return config
+        
+    def call(self, inputs):
+        x = self.tti_dense_0(inputs)
+        x = self.dropout_0(x)
+        outputs = self.tti_outputs(x)
+        return outputs
+    
+
+class TimeSeries(Layer):
+    
+    def __init__(self, CONFIGS, name='time_series_layer', **kwargs):
+        super(TimeSeries, self).__init__(name=name, **kwargs)
+        
+        if CONFIGS['model_type'] == 'flatten':
+            pass
+        elif CONFIGS['model_type'] == 'cnn1d':
+            self.conv1d_0 = Conv1D(16, 3, 2, activation='relu')
+            self.pool1d_0 = MaxPool1D(2)
+            self.conv1d_1 = Conv1D(32, 3, 2, activation='relu')
+            self.pool1d_1 = MaxPool1D(2)
+        elif CONFIGS['model_type'] == 'cnn2d':
+            self.conv2d_reshape = Reshape(target_shape=(
+                CONFIGS['window_size'], len(CONFIGS['time_series_cols']), 1
+            ))
+            self.conv2d_0 = Conv2D(8, (3, 1), strides=(2, 1), activation='relu')
+            self.pool2d_0 = MaxPool2D((2, 1))
+            self.conv2d_1 = Conv2D(16, (3, 1), strides=(2, 1), activation='relu')
+            self.pool2d_1 = MaxPool2D((2, 1))
+        elif CONFIGS['model_type'] == 'lstm':
+            self.lstm_0 = LSTM(16, return_sequences=True, activation='relu')
+            self.lstm_1 = LSTM(32, activation='relu')
+        elif CONFIGS['model_type'] == 'bilstm':
+            self.bilstm_0 = Bidirectional(LSTM(16, return_sequences=True, activation='relu'))
+            self.bilstm_1 = Bidirectional(LSTM(32, activation='relu'))
+        self.time_series_outputs = Flatten()
+        
+    def get_config(self):
+        config = super(TimeSeries, self).get_config().copy()
+        if CONFIGS['model_type'] == 'flatten':
+            pass
+        elif CONFIGS['model_type'] == 'cnn1d':
+            config.update({
+                'conv1d_0': self.conv1d_0,
+                'pool1d_0': self.pool1d_0,
+                'conv1d_1': self.conv1d_1,
+                'pool1d_1': self.pool1d_1,
+            })
+        elif CONFIGS['model_type'] == 'cnn2d':
+            config.update({
+                'conv2d_reshape': self.conv2d_reshape,
+                'conv2d_0': self.conv2d_0,
+                'pool2d_0': self.pool2d_0,
+                'conv2d_1': self.conv2d_1,
+                'pool2d_1': self.pool2d_1,
+            })
+        elif CONFIGS['model_type'] == 'lstm':
+            config.update({
+                'lstm_0': self.lstm_0,
+                'lstm_1': self.lstm_1,
+            })
+        elif CONFIGS['model_type'] == 'bilstm':
+            config.update({
+                'bilstm_0': self.bilstm_0,
+                'bilstm_1': self.bilstm_1,
+            })
+        config.update({
+            'time_series_outputs': self.time_series_outputs,
+        })
+        return config
+        
+    def call(self, inputs):
+        if CONFIGS['model_type'] == 'flatten':
+            x = inputs
+        elif CONFIGS['model_type'] == 'cnn1d':
+            x = self.conv1d_0(inputs)
+            x = self.pool1d_0(x)
+            x = self.conv1d_1(x)
+            x = self.pool1d_1(x)
+        elif CONFIGS['model_type'] == 'cnn2d':
+            x = self.conv2d_reshape(x)
+            x = self.conv2d_0(x)
+            x = self.pool2d_0(x)
+            x = self.conv2d_1(x)
+            x = self.pool2d_1(x)
+        elif CONFIGS['model_type'] == 'lstm':
+            x = self.lstm_0(x)
+            x = self.lstm_1(x)
+        elif CONFIGS['model_type'] == 'bilstm':
+            x = self.bilstm_0(x)
+            x = self.bilstm_1(x)
+        outputs = self.time_series_outputs(x)
+        return outputs
+```
+
 #### Set Model
+
+```python
+def set_model(CONFIGS, model_name=None, print_summary=False):
+    
+    # building_num
+    building_num_inputs = Input(batch_shape=(None, 1), name='building_num_inputs')
+    bn_outputs = BuildingNum(CONFIGS)(building_num_inputs)
+    
+    # building_info
+    building_info_inputs = Input(
+        batch_shape=(None, len(CONFIGS['building_info_cols'])),
+        name='building_info_inputs'
+    )
+    bi_outputs = BuildingInfo(CONFIGS)(building_info_inputs)
+    
+    # target_time_info
+    target_time_info_inputs = Input(
+        batch_shape=(None, len(CONFIGS['target_time_info_cols'])),
+        name='target_time_info_inputs'
+    )
+    tti_outputs = TargetTimeInfo(CONFIGS)(target_time_info_inputs)
+    
+    # time_series
+    time_series_inputs = Input(batch_shape=(
+        None, CONFIGS['window_size'], len(CONFIGS['time_series_cols'])
+    ), name='time_series_inputs')
+    time_series_outputs = TimeSeries(CONFIGS)(time_series_inputs)
+    
+    concat = Concatenate(name='concat')([bn_outputs, bi_outputs, tti_outputs, time_series_outputs])
+        
+    dense_0 = Dense(64, activation='relu', name='dense_0')(concat)
+    dropout_0 = Dropout(0.3, name='dropout_0')(dense_0)
+    dense_1 = Dense(32, activation='relu', name='dense_1')(dropout_0)
+    dropout_1 = Dropout(0.3, name='dropout_1')(dense_1)
+    outputs = Dense(CONFIGS['target_length'], name='outputs')(dropout_1)
+    
+    # to_inverse
+    to_inverse_inputs = Input(batch_shape=(None, len(CONFIGS['to_inverse_cols'])), name='to_inverse_inputs')
+    concat_to_inverse = Concatenate(name='concat_to_inverse')([outputs, to_inverse_inputs])
+    
+    if not model_name:
+        model_name = CONFIGS['model_name']
+    
+    model = Model(
+        inputs = [
+            building_num_inputs,
+            building_info_inputs,
+            target_time_info_inputs,
+            time_series_inputs,
+            to_inverse_inputs
+        ],
+        outputs = concat_to_inverse,
+        name = model_name
+    )
+    
+    custom_mse = CustomMSE(CONFIGS['target_max'])
+    inversed_rmse = InversedRMSE(CONFIGS)
+    optimizer = Adam(learning_rate=CONFIGS['learning_rate'])
+    model.compile(
+        loss = custom_mse,
+        optimizer = optimizer,
+        metrics = [inversed_rmse],
+    )
+    
+    if print_summary:
+        model.summary()
+    
+    return model
+
+
+CONFIGS['target_max'] = \
+    data[data['date_time']<CONFIGS['valid_start_date_time']]['target'].max()
+CONFIGS['embedding_dim'] = 10
+
+model = set_model(CONFIGS, print_summary=True)
+```
+
+```
+Model: "recursive_prediction"
+__________________________________________________________________________________________________
+ Layer (type)                   Output Shape         Param #     Connected to                     
+==================================================================================================
+ building_num_inputs (InputLaye  [(None, 1)]         0           []                               
+ r)                                                                                               
+                                                                                                  
+ building_info_inputs (InputLay  [(None, 7)]         0           []                               
+ er)                                                                                              
+                                                                                                  
+ target_time_info_inputs (Input  [(None, 11)]        0           []                               
+ Layer)                                                                                           
+                                                                                                  
+ time_series_inputs (InputLayer  [(None, 168, 12)]   0           []                               
+ )                                                                                                
+                                                                                                  
+ building_num_layer (BuildingNu  (None, 10)          600         ['building_num_inputs[0][0]']    
+ m)                                                                                               
+                                                                                                  
+ building_info_layer (BuildingI  (None, 32)          672         ['building_info_inputs[0][0]']   
+ nfo)                                                                                             
+                                                                                                  
+ target_time_info_layer (Target  (None, 32)          736         ['target_time_info_inputs[0][0]']
+ TimeInfo)                                                                                        
+                                                                                                  
+ time_series_layer (TimeSeries)  (None, 320)         2160        ['time_series_inputs[0][0]']     
+                                                                                                  
+ concat (Concatenate)           (None, 394)          0           ['building_num_layer[0][0]',     
+                                                                  'building_info_layer[0][0]',    
+                                                                  'target_time_info_layer[0][0]', 
+                                                                  'time_series_layer[0][0]']      
+                                                                                                  
+ dense_0 (Dense)                (None, 64)           25280       ['concat[0][0]']                 
+                                                                                                  
+ dropout_0 (Dropout)            (None, 64)           0           ['dense_0[0][0]']                
+                                                                                                  
+ dense_1 (Dense)                (None, 32)           2080        ['dropout_0[0][0]']              
+                                                                                                  
+ dropout_1 (Dropout)            (None, 32)           0           ['dense_1[0][0]']                
+                                                                                                  
+ outputs (Dense)                (None, 1)            33          ['dropout_1[0][0]']              
+                                                                                                  
+ to_inverse_inputs (InputLayer)  [(None, 2)]         0           []                               
+                                                                                                  
+ concat_to_inverse (Concatenate  (None, 3)           0           ['outputs[0][0]',                
+ )                                                                'to_inverse_inputs[0][0]']      
+                                                                                                  
+==================================================================================================
+Total params: 31,561
+Trainable params: 31,561
+Non-trainable params: 0
+__________________________________________________________________________________________________
+```
+
+#### Customize Callback
+
+```python
+def recursive_eval(model, ds, data_usage, CONFIGS):
+    
+    if data_usage == 'valid':
+        seq_len = str_to_dt(CONFIGS['test_start_date_time']) - \
+            str_to_dt(CONFIGS['valid_start_date_time'])
+    elif data_usage == 'test':
+        seq_len = str_to_dt(CONFIGS['last_date_time'])+datetime.timedelta(hours=1) - \
+            str_to_dt(CONFIGS['test_start_date_time'])
+    seq_len = seq_len.total_seconds()/3600
+
+    (_, _, _, fisrt_ts, _), _ = iter(ds).next()
+    ts_target = fisrt_ts[..., -1:]
+
+    inversed_mse = 0
+    for (bn, bi, tti, ts, ti), y_true in ds:
+        assert len(y_true) == 60, \
+            f'batch_size is {len(y_true)} now. Set batch_size same as CONFIGS["n_buildings"]'
+        ts_wo_target = ts[..., :-1]
+        ts_concat = tf.concat([ts_wo_target, ts_target], axis=-1)
+
+        y_true = tf.reshape(y_true, (-1, ))
+        y_pred = model.predict((bn, bi, tti, ts_concat, ti))
+        y_pred, mean, std = y_pred[..., 0], y_pred[..., 1], y_pred[..., 2]
+
+        ts_target = tf.concat([
+            ts_target[:, 1:, :],
+            y_pred.reshape(CONFIGS['n_buildings'], 1, 1)
+        ], axis=1)
+
+        y_true_inversed = y_true*std+mean
+        y_pred_inversed = y_pred*std+mean
+
+        inversed_mse += sum((y_true_inversed-y_pred_inversed)**2)/(seq_len*CONFIGS['n_buildings'])
+
+    inversed_rmse = inversed_mse**0.5
+
+    return inversed_rmse
+```
+
+```python
+class BestByRecursiveRMSE(Callback):
+
+    def __init__(self, valid_ds, CONFIGS):
+        super(BestByRecursiveRMSE, self).__init__()
+        self.valid_ds = valid_ds
+        self.CONFIGS = CONFIGS
+        self.best_weights = None
+
+    def on_train_begin(self, logs=None):
+        self.best_epoch = None
+        self.wait = 0
+        self.stopped_epoch = 0
+        self.best_train_loss = np.inf
+        self.best_valid_rmse = np.inf
+
+    def on_epoch_end(self, epoch, logs=None):
+        self.best_epoch = epoch
+        train_loss = logs.get("loss")
+        valid_rmse = recursive_eval(self.model, self.valid_ds, 'valid', self.CONFIGS)
+        print(f'Epoch: {epoch}')
+        print(f'\ttrain loss: {train_loss:.07f}\trecursive valid rmse: {valid_rmse:.07f}\n')
+        
+        if np.less(valid_rmse, self.best_valid_rmse):
+            self.best_train_loss = train_loss
+            self.best_valid_rmse = valid_rmse
+            self.wait = 0
+            self.best_weights = self.model.get_weights()
+        else:
+            self.wait += 1
+            if self.wait >= CONFIGS['es_patience']:
+                self.stopped_epoch = epoch
+                self.model.stop_training = True
+                self.model.set_weights(self.best_weights)
+
+    def on_train_end(self, logs=None):
+        if self.stopped_epoch > 0:
+            self.model.save_weights(f'{CONFIGS["model_path"]}{CONFIGS["model_name"]}.h5')
+            print(f'\nBest epoch by recursive valid rmse: {self.best_epoch}')
+            print(f'\tBest train loss: {self.best_train_loss:.07f}\tBest recursive valid rmse: {self.best_valid_rmse:.07f}\n')
+```
 
 #### Train
 
+```python
+def train_model(model, train_ds, valid_ds, CONFIGS):
+    
+    tensorboard_callback = TensorBoard(
+        log_dir = CONFIGS['tensorboard_log_path']
+    )
+    best_by_recursive_rmse = BestByRecursiveRMSE(valid_ds, CONFIGS)
+    
+    history = model.fit(
+        train_ds,
+        batch_size = CONFIGS['batch_size'],
+        epochs = CONFIGS['epochs'],
+        callbacks = [
+            best_by_recursive_rmse,
+            tensorboard_callback,
+        ],
+        verbose=0
+    )
+    
+    return history
+
+
+history = train_model(model, train_ds, valid_ds, CONFIGS)
+```
+
 #### Evaluate
+
+```python
+best_model = set_model(CONFIGS, model_name='best_'+CONFIGS['model_name'])
+best_model.load_weights(f'{CONFIGS["model_path"]}{CONFIGS["model_name"]}.h5')
+
+train_loss, train_rmse = best_model.evaluate(train_ds, verbose=0)
+valid_loss, _ = best_model.evaluate(valid_ds, verbose=0)
+test_loss, _ = best_model.evaluate(test_ds, verbose=0)
+
+valid_rmse = recursive_eval(best_model, valid_ds, 'valid', CONFIGS)
+test_rmse = recursive_eval(best_model, test_ds, 'test', CONFIGS)
+
+print(f'train_loss: {train_loss:.6f}\ttrain_rmse: {train_rmse:.6f}')
+print(f'valid_loss: {valid_loss:.6f}\tvalid_rmse: {valid_rmse:.6f}')
+print(f'test_loss: {test_loss:.6f}\ttest_rmse: {test_rmse:.6f}')
+```
 
 ## 목차
 
