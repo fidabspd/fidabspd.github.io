@@ -5,7 +5,14 @@ tags: [Time-Series, Tensorflow, Keras]
 excerpt_separator: <!--more-->
 ---
 
+앞선 시계열 시리즈들에서 validset과 testset의 sequence길이는 모두 일주일이었다. 하지만 `target_length`는 3에 불과했다. 계속 하던 방식처럼 trainset의 일부를 testset으로 분리하는 방식이 아닌 정말로 미래의 데이터를 예측해야하는 경우였다면 앞선 내용들은 세시간 뒤의 미래밖에 예측할 수 없다.  
 <!--more-->
+이를 일주일을 통째로 예측하기 위해서는 두가지 방법이 있다.
+
+1. `target_length`를 일주일로 늘린다.
+2. 모델의 예측값을 다시 input으로 넣어가며 recursive하게 데이터를 구성한다.
+
+이중에서 1번 방법은 `target_length = 7*24` 해주면 그만이므로 다루지 않기로 하고, 2번 방법을 다뤄보도록 하자.
 
 ## 목차
 
@@ -42,15 +49,81 @@ excerpt_separator: <!--more-->
 
 ***
 
-## 
+## Recursive Input Prediction
+
+개념은 어려울 것이 전혀 없다. `window_size = 7; target_length = 1`을 이용하고 있다면,  
+우선 t-7 ~ t-1를 input으로 이용하여 t0을 예측하고, 예측된 값인 t0를 다시 input에 포함시켜 t-6 ~ t0을 구성하고 이를 이용하여 t+1을 예측하면 된다.
+
+참고로 대부분의 경우에는 이렇게 recursive하게 input을 활용하는 것(2번 방법) 보단 그냥 `target_length`자체를 늘려버리는 방법(1번 방법)이 성능면에서 더 낫다는 평가가 많으며 필자의 경험상도 그렇다.  
+하지만 본 포스팅의 목적은 시계열 데이터를 이용하여 모델을 만드는 과정에서 마주하는 다양한 어려움들을 어떻게 해결하면 좋을지에 대해 정리하는 내용이기 때문에 **1번** 방법보다는 더 어려운 방법인 **2번** 방법을 써보도록 하자.
 
 ## CODE
 
 ### Libraries
 
+```python
+from copy import deepcopy
+
+import numpy as np
+import pandas as pd
+
+import datetime
+
+import tensorflow as tf
+from tensorflow.data import Dataset
+from tensorflow.keras.layers import *
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.losses import Loss
+from tensorflow.keras.metrics import Metric
+from tensorflow.keras.callbacks import TensorBoard, Callback
+```
+
 ### Set Configs
 
+```python
+CONFIGS = {
+    'data_path': '../data/',
+    'model_path': '../model/',
+    'model_name': 'recursive_prediction',
+    'model_type': 'cnn1d',
+    
+    'dtype': tf.float32,
+    
+    'valid_start_date_time': '2020-08-11 00',
+    'test_start_date_time': '2020-08-18 00',
+    
+    'buffer_size': 512,
+    'batch_size': 64,
+    'learning_rate': 1e-4,
+    'epochs': 100,
+    'es_patience': 10,
+    
+    'window_size': 7*24,
+    'shift': 1,
+    'target_length': 1,
+}
+
+CONFIGS['tensorboard_log_path'] = f'../logs/tensorboard/{CONFIGS["model_name"]}'
+```
+
 ### Load Data
+
+```python
+train_origin = pd.read_csv(CONFIGS['data_path']+'train.csv', encoding='cp949')
+
+data = deepcopy(train_origin)
+
+data.columns = [
+    'num', 'date_time', 'target', 'temp', 'wind',
+    'humid', 'rain', 'sun', 'non_elec_eq', 'sunlight_eq'
+]
+
+data['num'] -= 1
+
+CONFIGS['last_date_time'] = data['date_time'].max()
+CONFIGS['n_buildings'] = len(data['num'].unique())
+```
 
 ### 결측값 추가
 
