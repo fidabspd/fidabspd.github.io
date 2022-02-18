@@ -56,6 +56,7 @@ excerpt_separator: <!--more-->
 우선 t-7 ~ t-1를 input으로 이용하여 t0을 예측하고, 예측된 값인 t0를 다시 input에 포함시켜 t-6 ~ t0을 구성하고 이를 이용하여 t+1을 예측하면 된다.
 
 참고로 대부분의 경우에는 이렇게 recursive하게 input을 활용하는 것(2번 방법) 보단 그냥 `target_length`자체를 늘려버리는 방법(1번 방법)이 성능면에서 더 낫다는 평가가 많으며 필자의 경험상도 그렇다.  
+그 이유는 첫번째 예측이 잘못되면 두번째 예측부터는 아예 잘못된 값이 input으로 들어가게 되며 이는 연쇄적인 효과를 일으켜 sequence가 길어질수록 왜곡이 커지기 때문이다.  
 하지만 본 포스팅의 목적은 시계열 데이터를 이용하여 모델을 만드는 과정에서 마주하는 다양한 어려움들을 어떻게 해결하면 좋을지에 대해 정리하는 내용이기 때문에 **1번** 방법보다는 더 어려운 방법인 **2번** 방법을 써보도록 하자.
 
 ## CODE
@@ -519,8 +520,13 @@ test_ds = mk_dataset(test, CONFIGS, batch_size=CONFIGS['n_buildings'])
 ```
 
 `mk_time_series` 부분만 제외하면 이전과 거의 흡사하다.  
-다만 눈에 띄는 점 한가지는 `valid`와 `test`의 `batch_size`가 `CONFIGS`와 다르다는 것이다.  
+다만 눈에 띄는 점 한가지는 `valid`와 `test`의 `batch_size`가 `CONFIGS`의 `batch_size`와 다르다는 것이다.  
 
+##### batch_size
+
+`valid`와 `test`의 `batch_size`는 `CONFIGS['n_buildings']`로 주었는데 이는 rolling prediction을 쉽게 하기 위함이다.  
+`batch_size`를 `CONFIGS['n_buildings']`로 설정하면 첫번째 batch의 output을 두번째 batch의 input에 그대로 다시 사용할 수 있다.  
+굳이 이렇게 사용하지 않더라도 다양한 방법으로 해결할 수 있지만 이 방법이 가장 직관적인 방법 중 하나라고 생각한다.
 
 ### Modeling
 
@@ -869,7 +875,11 @@ Non-trainable params: 0
 __________________________________________________________________________________________________
 ```
 
-#### Customize Callback
+모델 구성은 [Multi-Task Learning 시계열 모델](https://fidabspd.github.io/2022/01/30/time_series_4-2.html)과 완벽히 일치한다.
+
+#### Recursive Input을 활용한 Evaluation
+
+rolling prediction을 수행한 결과를 평가하기 위한 함수를 정의한다.  
 
 ```python
 def recursive_eval(model, ds, data_usage, CONFIGS):
@@ -881,6 +891,8 @@ def recursive_eval(model, ds, data_usage, CONFIGS):
         seq_len = str_to_dt(CONFIGS['last_date_time'])+datetime.timedelta(hours=1) - \
             str_to_dt(CONFIGS['test_start_date_time'])
     seq_len = seq_len.total_seconds()/3600
+    assert seq_len % CONFIGS['target_length'] == 0, \
+        f'seq_len must be multiple of target_length. Now seq_len: {seq_len}, target_length: {CONFIGS["target_length"]}'
 
     (_, _, _, fisrt_ts, _), _ = iter(ds).next()
     ts_target = fisrt_ts[..., -1:]
@@ -889,8 +901,6 @@ def recursive_eval(model, ds, data_usage, CONFIGS):
     for i, ((bn, bi, tti, ts, ti), y_true) in enumerate(ds):
         assert len(y_true) == CONFIGS['n_buildings'], \
             f'batch_size is {len(y_true)} now. Set batch_size same as CONFIGS["n_buildings"]'
-        assert seq_len % CONFIGS['target_length'] == 0, \
-            f'seq_len must be multiple of target_length. Now seq_len: {seq_len}, target_length: {CONFIGS["target_length"]}'
         if i%CONFIGS['target_length'] != 0:
             continue
         ts_wo_target = ts[..., :-1]
@@ -915,6 +925,16 @@ def recursive_eval(model, ds, data_usage, CONFIGS):
     return inversed_rmse
 ```
 
+[batch_size](#batch_size)에서 설명했듯이 `batch_size`를 task의 개수와 같게 설정하여, 첫 batch를 이용한 prediction 결과를 두번째 batch의 input에 포함시키고 이를 반복 수행하도록 한다. 하지만 현재 `target_length=3`, `shift=1` 이기 때문에 약간의 수정이 필요하다. 다양한 방법이 있겠지만 가장 간단하게 3번의 batch마다 이전의 prediction 값을 다음번의 input에 포함시키는 방법을 사용하도록 하자.  
+이전과 마찬가지로 inversed된 rmse를 계산한다.
+
+#### Customize Callback
+
+모든 시계열 시리즈들에서 공통적으로 **best model**을 선정할 떄 validset을 이용했다. 그러기 위해 valid_loss, valid_metric을 모든 epoch이 끝날 때마다 계산하는 과정이 반드시 따라왔다. 그리고 이는 `model.fit()`에 `validation_data`를 넣어줌으로써 가능했다.  
+하지만 현재는 바로 앞에 정의한 `recursive_eval`을 이용하여 `validation_data`를 평가해야한다. 방법은 다양하겠지만 `Callback`을 이용한 customize를 해보자.
+
+`recursive_eval`을 이용하는 것 외에도 전 시계열 시리즈 포스팅들에서 꾸준히 사용하던 `EarlyStopping`과 `ModelCheckpoint`를 직접 구현해보자.
+
 ```python
 class BestByRecursiveRMSE(Callback):
 
@@ -929,20 +949,21 @@ class BestByRecursiveRMSE(Callback):
         self.wait = 0
         self.stopped_epoch = 0
         self.best_train_loss = np.inf
+        self.best_train_rmse = np.inf
         self.best_valid_rmse = np.inf
 
     def on_epoch_end(self, epoch, logs=None):
-        self.best_epoch = epoch
         train_loss = logs.get('loss')
-        train_inversed_rmse = logs.get('inversed_rmse')
+        train_rmse = logs.get('inversed_rmse')
         valid_rmse = recursive_eval(self.model, self.valid_ds, 'valid', self.CONFIGS)
         print(f'Epoch: {epoch}')
-        print(f'\ttrain loss: {train_loss:.07f}\ttrain_inversed_rmse: {train_inversed_rmse:.07f}')
-        print(f'\trecursive valid rmse: {valid_rmse:.07f}\n')
+        print(f'\ttrain loss: {train_loss:.07f}\ttrain inversed rmse: {train_rmse:.07f}')
+        print(f'\trecursive inversed valid rmse: {valid_rmse:.07f}\n')
         
         if np.less(valid_rmse, self.best_valid_rmse):
+            self.best_epoch = epoch
             self.best_train_loss = train_loss
-            self.best_train_inversed_rmse = train_inversed_rmse
+            self.best_train_rmse = train_rmse
             self.best_valid_rmse = valid_rmse
             self.wait = 0
             self.best_weights = self.model.get_weights()
@@ -957,9 +978,24 @@ class BestByRecursiveRMSE(Callback):
         if self.stopped_epoch > 0:
             self.model.save_weights(f'{CONFIGS["model_path"]}{CONFIGS["model_name"]}.h5')
             print(f'\nBest epoch by recursive valid rmse: {self.best_epoch}')
-            print(f'\ttrain loss: {self.best_train_loss:.07f}\ttrain_inversed_rmse: {self.best_train_inversed_rmse:.07f}')
-            print(f'\trecursive valid rmse: {self.best_valid_rmse:.07f}')
+            print(f'\ttrain loss: {self.best_train_loss:.07f}\ttrain inversed rmse: {self.best_train_rmse:.07f}')
+            print(f'\trecursive inversed valid rmse: {self.best_valid_rmse:.07f}')
 ```
+
+함수명이 직관적인 편으로 코드 읽어보면 어떤 기능을 수행 하는지 파악할 수 있다.  
+`Callback`을 상속받으면 정확히 어떤 기능들을 수행할 수 있는지는 워낙 광범위하기 때문에 기회가 되면 따로 다뤄보도록 하고, 지금은 사용한 것들에 대해서만 알아보자.
+
+`on_train_begin`은 말 그대로 train이 시작될 때 호출 된다.  
+여기서 각종 best score들을 기록하기 위한 변수들을 init한다.
+
+`on_epoch_end`는 epoch이 끝날 때마다 호출된다.  
+`train_loss`, `train_inversed_rmse` 두가지는 `logs`에서 불러온다.  
+`valid_rmse`는 미리 정의한 `recursive_eval`를 이용하여 계산한다.  
+`valid_rmse` 기준 best값이 갱신되면 `wait`을 0으로 초기화하고 해당 epoch의 loss와 metric값들을 새로운 best로 저장한다.  
+`es_patience`만큼 best의 갱신이 일어나지 않으면 학습을 종료한다. 
+
+`on_train_end`는 학습이 종료되면 호출된다.  
+best model을 저장한다.
 
 #### Train
 
@@ -1016,6 +1052,10 @@ test_loss: 0.0004342	test_rmse: 352.3868408
 recursive_valid_rmse: 434.670028
 recursive_test_rmse: 437.077567
 ```
+
+이전의 예측의 prediction값을 다음 예측의 input으로 recursive하게 활용하여 모델을 완성하고 평가하였다.  
+
+이상으로 약 한달 반가량 이어온 시계열 시리즈 포스팅을 끝마친다.
 
 ## 목차
 
