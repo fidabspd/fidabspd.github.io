@@ -105,7 +105,7 @@ CONFIGS = {
     
     'window_size': 7*24,
     'shift': 1,
-    'target_length': 1,
+    'target_length': 3,
 }
 
 CONFIGS['tensorboard_log_path'] = f'../logs/tensorboard/{CONFIGS["model_name"]}'
@@ -302,6 +302,138 @@ CONFIGS['input_cols'] = input_cols
 그래서 현재는 데이터를 건물별 sort된 순서가 아닌, date_time별로 sort된 순서로 데이터를 이용하도록 하자. 이렇게 하면 첫날의 60개 건물에 대한 데이터가 나오고 그 다음날의 60개 건물... 순서로 데이터가 나오게 된다.  
 이렇게 데이터를 구성하는 key는 `window`의 `stride`이다.
 
+`stride` 에 대해 알아보기 위해 간단한 데이터를 만들어 테스트해보자.
+
+```python
+ds = Dataset.from_tensor_slices(np.arange(20))
+ds = ds.window(size=2, shift=1, stride=2, drop_remainder=True)
+ds = ds.flat_map(lambda x: x).batch(2)
+list(ds.as_numpy_iterator())
+```
+
+```
+[array([0, 2]),
+ array([1, 3]),
+ array([2, 4]),
+ array([3, 5]),
+ array([4, 6]),
+ array([5, 7]),
+ array([6, 8]),
+ array([7, 9]),
+ array([ 8, 10]),
+ array([ 9, 11]),
+ array([10, 12]),
+ array([11, 13]),
+ array([12, 14]),
+ array([13, 15]),
+ array([14, 16]),
+ array([15, 17]),
+ array([16, 18]),
+ array([17, 19])]
+```
+
+보다시피 `stride`는 window를 구성할 때 데이터를 있는 그대로의 순서가 아닌 일부를 `stride`만큼 건너뛴 순서의 것을 다음 데이터로 보고 window를 구성한다.  
+이를 이용하여 multi-task learning의 dataset을 쉽게 구성할 수 있으며, 데이터의 순서를 task의 순서가 아닌 seqence의 기준이 되는 시간의 순서로 정렬할 수 있다.
+
+실제로 사용하기 전에 예시를 하나만 더 보자.  
+task의 개수는 3개, 각 task가 가지는 seqence_length는 3인 데이터를 생성해보자. (window_size는 4를 이용하겠다.)
+
+```python
+SIZE = 4; N_TASK = 3; SEQ_LEN = 7
+data = [
+    list(range(N_TASK))*SEQ_LEN,
+    [i//N_TASK for i in range(N_TASK*SEQ_LEN)],
+]
+data = np.array(data).T
+data
+```
+
+```
+array([[0, 0],
+       [1, 0],
+       [2, 0],
+       [0, 1],
+       [1, 1],
+       [2, 1],
+       [0, 2],
+       [1, 2],
+       [2, 2],
+       [0, 3],
+       [1, 3],
+       [2, 3],
+       [0, 4],
+       [1, 4],
+       [2, 4],
+       [0, 5],
+       [1, 5],
+       [2, 5],
+       [0, 6],
+       [1, 6],
+       [2, 6]])
+```
+
+```python
+ds = Dataset.from_tensor_slices(data)
+ds = ds.window(size=SIZE, shift=1, stride=N_TASK, drop_remainder=True)
+ds = ds.flat_map(lambda x: x).batch(SIZE)
+list(ds.as_numpy_iterator())
+```
+
+```
+[array([[0, 0],
+        [0, 1],
+        [0, 2],
+        [0, 3]]),
+ array([[1, 0],
+        [1, 1],
+        [1, 2],
+        [1, 3]]),
+ array([[2, 0],
+        [2, 1],
+        [2, 2],
+        [2, 3]]),
+ array([[0, 1],
+        [0, 2],
+        [0, 3],
+        [0, 4]]),
+ array([[1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 4]]),
+ array([[2, 1],
+        [2, 2],
+        [2, 3],
+        [2, 4]]),
+ array([[0, 2],
+        [0, 3],
+        [0, 4],
+        [0, 5]]),
+ array([[1, 2],
+        [1, 3],
+        [1, 4],
+        [1, 5]]),
+ array([[2, 2],
+        [2, 3],
+        [2, 4],
+        [2, 5]]),
+ array([[0, 3],
+        [0, 4],
+        [0, 5],
+        [0, 6]]),
+ array([[1, 3],
+        [1, 4],
+        [1, 5],
+        [1, 6]]),
+ array([[2, 3],
+        [2, 4],
+        [2, 5],
+        [2, 6]])]
+```
+
+이렇게 하나의 task가 하나의 window씩을 만들도록 데이터를 구성할 수 있다.
+
+이를 실제 데이터에 적용해보자.
+
 ```python
 def mk_time_series(data, CONFIGS, is_input=False, is_time_series=False):
     if is_input:
@@ -385,6 +517,10 @@ train_ds = mk_dataset(train, CONFIGS, shuffle=True)
 valid_ds = mk_dataset(valid, CONFIGS, batch_size=CONFIGS['n_buildings'])
 test_ds = mk_dataset(test, CONFIGS, batch_size=CONFIGS['n_buildings'])
 ```
+
+`mk_time_series` 부분만 제외하면 이전과 거의 흡사하다.  
+다만 눈에 띄는 점 한가지는 `valid`와 `test`의 `batch_size`가 `CONFIGS`와 다르다는 것이다.  
+
 
 ### Modeling
 
@@ -750,25 +886,29 @@ def recursive_eval(model, ds, data_usage, CONFIGS):
     ts_target = fisrt_ts[..., -1:]
 
     inversed_mse = 0
-    for (bn, bi, tti, ts, ti), y_true in ds:
-        assert len(y_true) == 60, \
+    for i, ((bn, bi, tti, ts, ti), y_true) in enumerate(ds):
+        assert len(y_true) == CONFIGS['n_buildings'], \
             f'batch_size is {len(y_true)} now. Set batch_size same as CONFIGS["n_buildings"]'
+        assert seq_len % CONFIGS['target_length'] == 0, \
+            f'seq_len must be multiple of target_length. Now seq_len: {seq_len}, target_length: {CONFIGS["target_length"]}'
+        if i%CONFIGS['target_length'] != 0:
+            continue
         ts_wo_target = ts[..., :-1]
         ts_concat = tf.concat([ts_wo_target, ts_target], axis=-1)
 
-        y_true = tf.reshape(y_true, (-1, ))
+        y_true = tf.reshape(y_true, (CONFIGS['n_buildings'], CONFIGS['target_length']))
         y_pred = model.predict((bn, bi, tti, ts_concat, ti))
-        y_pred, mean, std = y_pred[..., 0], y_pred[..., 1], y_pred[..., 2]
+        y_pred, mean, std = y_pred[..., :-2], y_pred[..., [-2]], y_pred[..., [-1]]
 
         ts_target = tf.concat([
-            ts_target[:, 1:, :],
-            y_pred.reshape(CONFIGS['n_buildings'], 1, 1)
+            ts_target[:, CONFIGS['target_length']:, :],
+            y_pred.reshape(CONFIGS['n_buildings'], CONFIGS['target_length'], 1)
         ], axis=1)
 
         y_true_inversed = y_true*std+mean
         y_pred_inversed = y_pred*std+mean
 
-        inversed_mse += sum((y_true_inversed-y_pred_inversed)**2)/(seq_len*CONFIGS['n_buildings'])
+        inversed_mse += tf.reduce_sum((y_true_inversed-y_pred_inversed)**2)/(seq_len*CONFIGS['n_buildings'])
 
     inversed_rmse = inversed_mse**0.5
 
@@ -793,13 +933,16 @@ class BestByRecursiveRMSE(Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         self.best_epoch = epoch
-        train_loss = logs.get("loss")
+        train_loss = logs.get('loss')
+        train_inversed_rmse = logs.get('inversed_rmse')
         valid_rmse = recursive_eval(self.model, self.valid_ds, 'valid', self.CONFIGS)
         print(f'Epoch: {epoch}')
-        print(f'\ttrain loss: {train_loss:.07f}\trecursive valid rmse: {valid_rmse:.07f}\n')
+        print(f'\ttrain loss: {train_loss:.07f}\ttrain_inversed_rmse: {train_inversed_rmse:.07f}')
+        print(f'\trecursive valid rmse: {valid_rmse:.07f}\n')
         
         if np.less(valid_rmse, self.best_valid_rmse):
             self.best_train_loss = train_loss
+            self.best_train_inversed_rmse = train_inversed_rmse
             self.best_valid_rmse = valid_rmse
             self.wait = 0
             self.best_weights = self.model.get_weights()
@@ -814,7 +957,8 @@ class BestByRecursiveRMSE(Callback):
         if self.stopped_epoch > 0:
             self.model.save_weights(f'{CONFIGS["model_path"]}{CONFIGS["model_name"]}.h5')
             print(f'\nBest epoch by recursive valid rmse: {self.best_epoch}')
-            print(f'\tBest train loss: {self.best_train_loss:.07f}\tBest recursive valid rmse: {self.best_valid_rmse:.07f}\n')
+            print(f'\ttrain loss: {self.best_train_loss:.07f}\ttrain_inversed_rmse: {self.best_train_inversed_rmse:.07f}')
+            print(f'\trecursive valid rmse: {self.best_valid_rmse:.07f}')
 ```
 
 #### Train
@@ -851,15 +995,26 @@ best_model = set_model(CONFIGS, model_name='best_'+CONFIGS['model_name'])
 best_model.load_weights(f'{CONFIGS["model_path"]}{CONFIGS["model_name"]}.h5')
 
 train_loss, train_rmse = best_model.evaluate(train_ds, verbose=0)
-valid_loss, _ = best_model.evaluate(valid_ds, verbose=0)
-test_loss, _ = best_model.evaluate(test_ds, verbose=0)
+valid_loss, valid_rmse = best_model.evaluate(valid_ds, verbose=0)
+test_loss, test_rmse = best_model.evaluate(test_ds, verbose=0)
 
-valid_rmse = recursive_eval(best_model, valid_ds, 'valid', CONFIGS)
-test_rmse = recursive_eval(best_model, test_ds, 'test', CONFIGS)
+recursive_valid_rmse = recursive_eval(best_model, valid_ds, 'valid', CONFIGS)
+recursive_test_rmse = recursive_eval(best_model, test_ds, 'test', CONFIGS)
 
-print(f'train_loss: {train_loss:.6f}\ttrain_rmse: {train_rmse:.6f}')
-print(f'valid_loss: {valid_loss:.6f}\tvalid_rmse: {valid_rmse:.6f}')
-print(f'test_loss: {test_loss:.6f}\ttest_rmse: {test_rmse:.6f}')
+print(f'train_loss: {train_loss:.07f}\ttrain_rmse: {train_rmse:.07f}')
+print(f'valid_loss: {valid_loss:.07f}\tvalid_rmse: {valid_rmse:.07f}')
+print(f'test_loss: {test_loss:.07f}\ttest_rmse: {test_rmse:.07f}')
+
+print(f'\nrecursive_valid_rmse: {recursive_valid_rmse:.6f}\nrecursive_test_rmse: {recursive_test_rmse:.6f}')
+```
+
+```
+train_loss: 0.0001872	train_rmse: 231.3749847
+valid_loss: 0.0005532	valid_rmse: 397.7495422
+test_loss: 0.0004342	test_rmse: 352.3868408
+
+recursive_valid_rmse: 434.670028
+recursive_test_rmse: 437.077567
 ```
 
 ## 목차
