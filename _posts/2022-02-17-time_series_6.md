@@ -1045,12 +1045,12 @@ print(f'\nrecursive_valid_rmse: {recursive_valid_rmse:.6f}\nrecursive_test_rmse:
 ```
 
 ```
-train_loss: 0.0001872	train_rmse: 231.3749847
-valid_loss: 0.0005532	valid_rmse: 397.7495422
-test_loss: 0.0004342	test_rmse: 352.3868408
+train_loss: 0.0001319	train_rmse: 194.2317047
+valid_loss: 0.0005534	valid_rmse: 397.8041687
+test_loss: 0.0003501	test_rmse: 316.4278564
 
-recursive_valid_rmse: 434.670028
-recursive_test_rmse: 437.077567
+recursive_valid_rmse: 448.891640
+recursive_test_rmse: 387.803739
 ```
 
 이전의 예측의 prediction값을 다음 예측의 input으로 recursive하게 활용하여 모델을 완성하고 평가하였다.  
