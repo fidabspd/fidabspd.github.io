@@ -12,13 +12,13 @@ excerpt_separator: <!--more-->
 
 ## 목차
 
-1. 시계열 데이터의 기본적인 특징과 간단한 모델
-1. tf.data.Dataset을 이용한 시계열 데이터 구성
-1. Multi-Input 시계열 모델
-1. Multi-Task Learning 시계열 모델 (1)
-1. Multi-Task Learning 시계열 모델 (2)
-1. **시계열 target의 결측**
-1. 이전의 예측값을 다음의 input으로 recursive하게 이용
+1. [시계열 데이터의 기본적인 특징과 간단한 모델](https://fidabspd.github.io/2022/01/04/time_series_1.html)
+1. [tf.data.Dataset을 이용한 시계열 데이터 구성](https://fidabspd.github.io/2022/01/10/time_series_2.html)
+1. [Multi-Input 시계열 모델](https://fidabspd.github.io/2022/01/18/time_series_3.html)
+1. [Multi-Task Learning 시계열 모델 (1)](https://fidabspd.github.io/2022/01/28/time_series_4-1.html)
+1. [Multi-Task Learning 시계열 모델 (2)](https://fidabspd.github.io/2022/01/30/time_series_4-2.html)
+1. [**시계열 target의 결측**](https://fidabspd.github.io/2022/02/10/time_series_5.html)
+1. [Recursive Input Prediction](https://fidabspd.github.io/2022/02/17/time_series_6.html)
 
 ## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/blob/master/codes/5_handling_missing_value.ipynb)
 
@@ -968,12 +968,12 @@ test_loss: 0.000498	test_rmse: 376.542938
 
 ## 목차
 
-1. 시계열 데이터의 기본적인 특징과 간단한 모델
-1. tf.data.Dataset을 이용한 시계열 데이터 구성
-1. Multi-Input 시계열 모델
-1. Multi-Task Learning 시계열 모델 (1)
-1. Multi-Task Learning 시계열 모델 (2)
-1. **시계열 target의 결측**
-1. 이전의 예측값을 다음의 input으로 recursive하게 이용
+1. [시계열 데이터의 기본적인 특징과 간단한 모델](https://fidabspd.github.io/2022/01/04/time_series_1.html)
+1. [tf.data.Dataset을 이용한 시계열 데이터 구성](https://fidabspd.github.io/2022/01/10/time_series_2.html)
+1. [Multi-Input 시계열 모델](https://fidabspd.github.io/2022/01/18/time_series_3.html)
+1. [Multi-Task Learning 시계열 모델 (1)](https://fidabspd.github.io/2022/01/28/time_series_4-1.html)
+1. [Multi-Task Learning 시계열 모델 (2)](https://fidabspd.github.io/2022/01/30/time_series_4-2.html)
+1. [**시계열 target의 결측**](https://fidabspd.github.io/2022/02/10/time_series_5.html)
+1. [Recursive Input Prediction](https://fidabspd.github.io/2022/02/17/time_series_6.html)
 
 ## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/time_series/blob/master/codes/5_handling_missing_value.ipynb)
