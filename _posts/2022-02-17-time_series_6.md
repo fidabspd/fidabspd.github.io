@@ -861,16 +861,16 @@ ________________________________________________________________________________
                                                                                                   
  dropout_1 (Dropout)            (None, 32)           0           ['dense_1[0][0]']                
                                                                                                   
- outputs (Dense)                (None, 1)            33          ['dropout_1[0][0]']              
+ outputs (Dense)                (None, 3)            99          ['dropout_1[0][0]']              
                                                                                                   
  to_inverse_inputs (InputLayer)  [(None, 2)]         0           []                               
                                                                                                   
- concat_to_inverse (Concatenate  (None, 3)           0           ['outputs[0][0]',                
+ concat_to_inverse (Concatenate  (None, 5)           0           ['outputs[0][0]',                
  )                                                                'to_inverse_inputs[0][0]']      
                                                                                                   
 ==================================================================================================
-Total params: 31,561
-Trainable params: 31,561
+Total params: 31,627
+Trainable params: 31,627
 Non-trainable params: 0
 __________________________________________________________________________________________________
 ```
