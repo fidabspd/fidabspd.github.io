@@ -257,6 +257,16 @@ Tensorboard를 이용하여 loss를 기록한다.
 대신 `valid_dl`을 주지 않고 train set 만으로 과적합을 하게 되면 대화는 되지 않을지언정 언어적으로 말이 되는 문장을 준다.  
 따라서 `valid_dl`은 사용하지 않고 과적합시켰다.
 
+또한 챗봇을 제대로 만들 생각이라면 loss에 대한 고찰이 필요할 것으로 보인다.  
+예를들어 **100원만 빌려줘**라는 말에  
+**그래**, **싫어**, **100원이 없어**, **100원이 없니?** 등 나올 수 있는 답변은 무궁무진하다. 물론 이는 데이터셋으로 커버할 수 있긴 하다. 그럼 이 데이터를 모두 훈련했다고 가정하고 다음 답변이 나온다면 어떨까?  
+**음... 그래!**
+
+**그래** 역시 답변으로 학습했기 때문에 **음... 그래!**는 loss가 작을까? 절대 그렇지 않다.  
+이런 경우와 같이 옆으로 한칸씩 이동한 경우에도 사실상 정답이지만 현재 사용한 loss에서는 이를 전혀 고려하지 못하고 있다. (`CrossEntropyLoss`를 사용했다.)  
+
+챗봇을 제대로 만들고 싶다면 이런 loss에 대한 고찰 역시 필요할 것으로 보인다.
+
 훈련은 다음과 같이 진행된다.
 
 ```
@@ -391,9 +401,24 @@ def main(args):
         transformer = torch.load(MODEL_PATH+MODEL_NAME+'.pt')
         valid_loss = evaluate(transformer, valid_dl, criterion, device)
         print(f'Valid Loss: {valid_loss:.3f} | Valid PPL: {math.exp(valid_loss):.3f}')
+
+
+if __name__ == '__main__':
+
+    args = parse_args()
+    if args is None:
+        exit()
+
+    main(args)
 ```
 
 main함수이다.  
+
+tokenizer는 `BertWordPieceTokenizer`를 사용한다. 성능을 고려한것은 아니고 가장 사용하기 간편하다고 생각했다.
+
+optimizer는 `Adam`을 사용한다.
+
+loss는 `CrossEntropyLoss`를 사용한다. `ignore_index`를 통해 `<pad>`를 loss 계산에 포함하지 않을 수 있다.
 
 만약 논문을 읽어봤다면 구현되지 않은 것이 하나 보일 것이다.  
 [Attention Is All You Need](https://arxiv.org/abs/1706.03762)에서는 Optimizer에 대한 learning rate scheduler를 제안한다.  
