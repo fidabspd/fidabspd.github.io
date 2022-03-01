@@ -8,6 +8,16 @@ use_math: true
 
 지난 포스팅에서 훈련을 마친 Transformer로 Chatbot을 만들어보자.<!--more-->
 
+## 목차
+
+1. [Chatbot 만들기 (1)](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)
+1. [Chatbot 만들기 (2)](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)
+1. [**Chatbot 만들기 (3)**](https://fidabspd.github.io/2022/03/02/transformer_chatbot-3.html)
+
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/toy/blob/master/chatbot/codes)
+
+#### <span style="color:#b35900">완성된 Chatbot은 `chatbot/codes/`로 이동하여 chatbot.py를 실행하면 테스트 가능하다. 다만 Nvidia GPU환경에서만 가능하다.</span>
+
 ## CODE
 
 ### Libraries
@@ -213,5 +223,11 @@ Transformer를 만들고, 데이터를 전처리하고, 모델을 학습하고, 
 이상으로 챗봇 만들기 포스팅을 마친다.
 
 하지만 **챗봇 만들기**라는 중간 목표가 마무리 되었을 뿐. 아직 **TTS**를 향해 갈길이 멀다.
+
+## 목차
+
+1. [Chatbot 만들기 (1)](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)
+1. [Chatbot 만들기 (2)](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)
+1. [**Chatbot 만들기 (3)**](https://fidabspd.github.io/2022/03/02/transformer_chatbot-3.html)
 
 ## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/toy/blob/master/chatbot/codes)

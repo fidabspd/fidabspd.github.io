@@ -8,6 +8,14 @@ use_math: true
 
 지난 포스팅에서 PyTorch로 만든 Transformer를 훈련하고, 이를 이용하여 Chatbot을 만들어보자.<!--more-->
 
+## 목차
+
+1. [Chatbot 만들기 (1)](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)
+1. [**Chatbot 만들기 (2)**](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)
+1. [Chatbot 만들기 (3)](https://fidabspd.github.io/2022/03/02/transformer_chatbot-3.html)
+
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/toy/blob/master/chatbot/codes)
+
 ## Data
 
 데이터는 [songys](https://github.com/songys)님의 [ChatbotData](https://github.com/songys/Chatbot_data/blob/master/ChatbotData.csv)를 사용하였다.  
@@ -429,5 +437,11 @@ loss는 `CrossEntropyLoss`를 사용한다. `ignore_index`를 통해 `<pad>`를 
 이렇게 훈련을 마쳤다. 
 
 분량이 또 다시 길어져 Chatbot을 만들고 실행하는 것은 3부에서 계속하도록 하자.
+
+## 목차
+
+1. [Chatbot 만들기 (1)](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)
+1. [**Chatbot 만들기 (2)**](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)
+1. [Chatbot 만들기 (3)](https://fidabspd.github.io/2022/03/02/transformer_chatbot-3.html)
 
 ## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/toy/blob/master/chatbot/codes)

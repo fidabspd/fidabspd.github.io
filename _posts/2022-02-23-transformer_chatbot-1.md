@@ -29,6 +29,14 @@ use_math: true
 
 (Attention의 기본 개념은 잘 숙지된 상태를 가정한다. Transformer 또한 개념보다는 코드로 구현하는데에 초점이 있다.)
 
+## 목차
+
+1. [**Chatbot 만들기 (1)**](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)
+1. [Chatbot 만들기 (2)](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)
+1. [Chatbot 만들기 (3)](https://fidabspd.github.io/2022/03/02/transformer_chatbot-3.html)
+
+## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/toy/blob/master/chatbot/codes/transformer_torch.py)
+
 ### Architecture
 
 ![transformer_architecture](/assets/img/posts/transformer_chatbot-1/transformer_architecture.png)
@@ -427,5 +435,11 @@ mask로 가려줘야하는 부분은 [Multi-Head Attention](#multi-head-attentio
 
 [Attention Is All You Need](https://arxiv.org/abs/1706.03762)에 소개된 Transformer 구조를 PyTorch를 이용하여 구현해보았다.  
 분량이 길어져 이를 훈련하고, Chatbot을 만들고 실행하는 내용은 다음 포스팅에서 계속하도록 하자.
+
+## 목차
+
+1. [**Chatbot 만들기 (1)**](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)
+1. [Chatbot 만들기 (2)](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)
+1. [Chatbot 만들기 (3)](https://fidabspd.github.io/2022/03/02/transformer_chatbot-3.html)
 
 ## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/toy/blob/master/chatbot/codes/transformer_torch.py)
