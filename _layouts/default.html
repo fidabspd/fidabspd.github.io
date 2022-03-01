@@ -6,6 +6,9 @@
 -->
 <html lang="en">
   {% include default/head.liquid %}
+  {% if page.use_math %}
+    {% include mathjax_support.html %}
+  {% endif %}
   <body>
     {% include default/navbar.liquid %}
     <div class="content">

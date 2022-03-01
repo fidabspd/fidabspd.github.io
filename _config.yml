@@ -61,3 +61,10 @@ exclude:
 
 # theme: type-on-strap                                  # if using the theme as a jekyll theme gem
 # remote_theme: sylhare/Type-on-Strap                     # If using as a remote_theme in github
+
+# Conversion
+markdown: kramdown
+highlighter: rouge
+lsi: false
+excerpt_separator: "\n\n"
+incremental: false
