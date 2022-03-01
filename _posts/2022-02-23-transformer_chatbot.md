@@ -11,7 +11,7 @@ excerpt_separator: <!--more-->
 
 기존에 사용했던 Deep Voice 2 아키텍쳐이다. ([Deep Voice 2: Multi-Speaker Neural Text-to-Speech](https://arxiv.org/abs/1705.08947))
 
-![tacotron](/assets/img/posts/TTS_0/tacotron.png)
+![tacotron](/assets/img/posts/transformer_chatbot/tacotron.png)
 
 개선하고자 하는 Key는 `seq2seq -> transformer`이다.
 
@@ -22,4 +22,45 @@ excerpt_separator: <!--more-->
 ## Transformer
 
 순서대로라면 데이터 수집부터 시작해야겠지만 *구조를 이렇게 바꿀거다!*를 선언해버린 이상 Transformer를 지금 짚지 않고 넘어가는 것도 좀 웃기다.  
-어차피 Transformer를 만들어 씌우는게 목적이니, 일단은 Transformer를 이용한 챗봇을 만들어보자. 그 뒤에 데이터 수집부터 시작한다. (솔직히 재미있을 것 같아서 빨리 하고싶었다..!)  
+어차피 Transformer를 만들어 씌우는게 목적이니, 일단은 Transformer를 이용한 챗봇을 만들어보자. 그 뒤에 데이터 수집부터 시작한다. (솔직히 재미있을 것 같아서 빨리 하고싶었다..!)
+
+우선은 Transformer를 구현해보자.
+
+### Architecture
+
+![transformer_architecture](/assets/img/posts/transformer_chatbot/transformer_architecture.png)
+
+그 유명한 [Attention Is All You Need](https://arxiv.org/abs/1706.03762)에 소개된 아키텍쳐이다.
+
+이를 최대한 간단하게 설명하면 다음과 같다.
+
+- `Inputs`와 `Outputs`는 `positional_encoding`을 수행한다.
+    - `Outputs`는 `shifted right`하여 들어간다.
+- `Encoder`와 `Decoder`로 이루어져있다.
+- `Encoder`는
+    - `self_attention`
+    - `feed_forward`  
+    로 이루어져있다.
+- `Decoder`는
+    - `self_attention`
+    - `Encoder`의 output을 K(Key), V(Value)로 사용하고, `Decoder self_attention`의 output을 Q(Query)로 사용한 `Encoder-Decoder attention`  
+    (Q, K, V는 뒤에서 마저 설명)
+    - `feed_forward`  
+    로 이루어져있다.
+- 각 `attention`과 `feed_forward`가 끝날 때마다 `layer_normalization`과 `residual_connection`을 수행한다.
+- 각 `Encoder`와 `Decoder`는 `N`번 반복하여 stack을 쌓는다.
+- `Decoder`의 최종 output에 `Linear`와 `Softmax`를 붙인다.
+
+각 `attention`은 `Multi-Head Attention`이라고 부르며 구조는 다음과 같다.
+
+![multi_head_attention](/assets/img/posts/transformer_chatbot/multi_head_attention.png)
+
+- `Multi-Head Attention`은 `Scaled Dot-Product Attention`이 `h`번 반복된 구조이다.
+- `Scaled Dot-Product Attention`은 `Linear`를 지난 `Q`, `K`, `V`를 이용한다.  
+(`Scaled Dot-Product Attention`에 대한 설명은 생략)
+- `Scaled Dot-Product Attention`의 결과들을 `Concat`하여 `Linear`를 이용하여 최종 output을 만든다.
+
+`Scaled Dot-Product Attention`의 계산은 한줄의 식으로 표현이 가능하다.  
+
+$Attention(Q, K, V) = softmax\bigg(\frac{QK^T}{\sqrt{d_k}}\bigg)V$
+
