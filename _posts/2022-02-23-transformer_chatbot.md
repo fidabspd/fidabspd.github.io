@@ -1,7 +1,7 @@
 ---
 layout: post
-title: TTS - Transformer
-tags: [TTS, NLP, Tacotron, Tensorflow, Keras]
+title: Transformer - 챗봇 만들기
+tags: [Chatbot, NLP, Transformer, PyTorch]
 excerpt_separator: <!--more-->
 ---
 
@@ -22,5 +22,4 @@ excerpt_separator: <!--more-->
 ## Transformer
 
 순서대로라면 데이터 수집부터 시작해야겠지만 *구조를 이렇게 바꿀거다!*를 선언해버린 이상 Transformer를 지금 짚지 않고 넘어가는 것도 좀 웃기다.  
-그래서 일단은 Transformer를 이용한 적당한 번역기를 만들어 Tutorial 느낌으로 Transformer를 짚고 넘어가려 한다. 그 뒤에 데이터 수집부터 시작하겠다.  
-참고할만한 자료도 너무 많고, Transformer를 제대로 이해하고 있다면 어렵지 않게 만들 수 있다.
+어차피 Transformer를 만들어 씌우는게 목적이니, 일단은 Transformer를 이용한 챗봇을 만들어보자. 그 뒤에 데이터 수집부터 시작한다. (솔직히 재미있을 것 같아서 빨리 하고싶었다..!)  
