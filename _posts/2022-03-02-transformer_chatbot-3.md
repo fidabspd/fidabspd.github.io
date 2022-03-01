@@ -6,7 +6,7 @@ excerpt_separator: <!--more-->
 use_math: true
 ---
 
-지난 포스팅에서 훈련을 마친 Transformer로 Chatbot을 만들어보자.<!--more-->
+[지난 포스팅](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)에서 훈련을 마친 Transformer로 Chatbot을 만들어보자.<!--more-->
 
 ## 목차
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
 
 이상한 소리 하면 무시하는 것 같다.
 
-그냥 농담처럼 얘기했지만, 사실 이전 포스팅에서 말했듯 `valid_loss`가 제대로 줄어들지 않았고(물론 지금 사용하는 loss가 완벽하지는 않지만) 훈련이 제대로 되지 않았다고 보는게 맞다.  
+그냥 농담처럼 얘기했지만, 사실 [Chatbot 만들기 (2)](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)에서 말했듯 `valid_loss`가 제대로 줄어들지 않았고(물론 지금 사용하는 loss가 완벽하지는 않지만) 훈련이 제대로 되지 않았다고 보는게 맞다.  
 train set에 없는 질문에 대한 답변은 그냥 아무말이나 하는 것이라고 봐야한다.
 
 ## Attention Visualization

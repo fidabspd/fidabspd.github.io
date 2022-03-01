@@ -6,7 +6,7 @@ excerpt_separator: <!--more-->
 use_math: true
 ---
 
-지난 포스팅에서 PyTorch로 만든 Transformer를 훈련하고, 이를 이용하여 Chatbot을 만들어보자.<!--more-->
+[지난 포스팅](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)에서 PyTorch로 만든 Transformer를 훈련하고, 이를 이용하여 Chatbot을 만들어보자.<!--more-->
 
 ## 목차
 
@@ -170,7 +170,7 @@ def train_one_epoch(model, dl, optimizer, criterion, clip, device, n_check=5):
 눈여겨볼 부분은 주석이 붙은 부분들이다.  
 
 - loss 계산에 정답으로 쓰일 `tar`는 `<sos>`토큰을 제거한다.  
-이전 포스팅에서 말 했듯이 Transformer는 다음 토큰을 예측하는데 쓰는 모델이다. `<sos>`를 예측해야하는 이전 토큰은 당연히 없다.
+[Chatbot 만들기 (1)](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)에서 말 했듯이 Transformer는 다음 토큰을 예측하는데 쓰는 모델이다. `<sos>`를 예측해야하는 이전 토큰은 당연히 없다.
 - 모델 input으로 들어가는 `tar`는 sequence의 마지막을 뗀다.  
 Transformer의 최종 output의 shape은 `[batch_size, query_len(tar), decoder vocab_size]`이다.  
 **모델 input으로 들어가는 `tar`**의 sequence 길이와, **loss 계산에 정답으로 쓰일 `tar`**는 길이가 같아야한다.
