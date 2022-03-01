@@ -92,7 +92,7 @@ def preprocess_sentences(sentences, tokenizer, max_seq_len):
 
 Chatbot 데이터를 이용하여 Transformer를 훈련하고 모델을 저장한다.
 
-#### Libraries
+### Libraries
 
 ```python
 import os
@@ -111,7 +111,7 @@ from chatbot_data_preprocessing import *
 from transformer_torch import *
 ```
 
-#### train_one_epoch
+### Train One Epoch
 
 ```python
 def train_one_epoch(model, dl, optimizer, criterion, clip, device, n_check=5):
@@ -167,7 +167,7 @@ def train_one_epoch(model, dl, optimizer, criterion, clip, device, n_check=5):
 Transformer의 최종 output의 shape은 `[batch_size, query_len(tar), decoder vocab_size]`이다.  
 **모델 input으로 들어가는 `tar`**의 sequence 길이와, **loss 계산에 정답으로 쓰일 `tar`**는 길이가 같아야한다.
 
-#### evaluate
+### Evaluate
 
 ```python
 def evaluate(model, dl, criterion, device):
@@ -195,7 +195,7 @@ def evaluate(model, dl, criterion, device):
 `evaluate`은 모델을 평가하는데 사용된다.  
 `train_one_epoch`과 마찬가지로, loss 계산에 정답으로 쓰일 `tar`는 `<sos>`토큰을 제거하고, 모델 input으로 들어가는 `tar`는 sequence의 마지막을 뗀다.
 
-#### train
+### Train
 
 ```python
 def train(model, n_epochs, es_patience, train_dl, valid_dl, optimizer,
@@ -272,7 +272,7 @@ Epoch Time: 0m 9s
 ------------------------------
 ```
 
-#### main
+### Main
 
 ```python
 def main(args):
