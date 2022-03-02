@@ -185,7 +185,7 @@ train set에 없는 질문에 대한 답변은 그냥 아무말이나 하는 것
 
 ## Attention Visualization
 
-[Chatbot 만들기 (1)]()의 `Transformer`를 보면 `outputs`외에 `attention`도 return하게 되어있다. 이는 각 `query`와 `key`가 어떤 attention을 가지고 있는지 행렬 형태를 return하게 된다.  
+[Chatbot 만들기 (1)](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)의 `Transformer`를 보면 `outputs`외에 `attention`도 return하게 되어있다. 이는 각 `query`와 `key`가 어떤 attention을 가지고 있는지 행렬 형태를 return하게 된다.  
 이를 이용하여 attention을 시각화 할 수 있다.  
 
 attention의 shape은 `[batch_size, n_heads, query_len, key_len]`로 한개의 데이터에 대해서는 `[n_heads, query_len, key_len]`의 shape을 가지게 된다.  
