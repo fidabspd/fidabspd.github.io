@@ -180,12 +180,12 @@ if __name__ == '__main__':
 
 이상한 소리 하면 무시하는 것 같다.
 
-그냥 농담처럼 얘기했지만, 사실 [Chatbot 만들기 (2)](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)에서 말했듯 `valid_loss`가 제대로 줄어들지 않았고(물론 지금 사용하는 loss가 완벽하지는 않지만) 훈련이 제대로 되지 않았다고 보는게 맞다.  
+그냥 농담처럼 얘기했지만, 사실 [Chatbot 만들기 (2)의 Train](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html#train)에서 말했듯 `valid_loss`가 제대로 줄어들지 않았고(물론 지금 사용하는 loss가 완벽하지는 않지만) 훈련이 제대로 되지 않았다고 보는게 맞다.  
 train set에 없는 질문에 대한 답변은 그냥 아무말이나 하는 것이라고 봐야한다.
 
 ## Attention Visualization
 
-[Chatbot 만들기 (1)](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)의 `Transformer`를 보면 `outputs`외에 `attention`도 return하게 되어있다. 이는 각 `query`와 `key`가 어떤 attention을 가지고 있는지 행렬 형태를 return하게 된다.  
+[Chatbot 만들기 (1)의 `Transformer`](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html#transformer-1)를 보면 `outputs`외에 `attention`도 return하게 되어있다. 이는 각 `query`와 `key`가 어떤 attention을 가지고 있는지 행렬 형태를 return하게 된다.  
 이를 이용하여 attention을 시각화 할 수 있다.  
 
 attention의 shape은 `[batch_size, n_heads, query_len, key_len]`로 한개의 데이터에 대해서는 `[n_heads, query_len, key_len]`의 shape을 가지게 된다.  
