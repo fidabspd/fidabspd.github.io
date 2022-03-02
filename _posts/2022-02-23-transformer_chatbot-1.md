@@ -77,8 +77,8 @@ use_math: true
 $Attention(Q, K, V) = softmax\bigg(\dfrac{QK^T}{\sqrt{d_k}}\bigg)V\;, \quad \mathbf{where} \; d_k = \dfrac{d_{model}}{h(=number\, of\, heads)}$  
 (자세하게 설명하자면 복잡하지만, $d_{model}$은 `Embedding`의 output차원이라고 생각하면 편하다.)
 
-`Scaled Dot-Product Attention`의 `masking`에 대한 설명이 조금은 부족하지만, 여기까지만 알면 **Transformer**를 만들 수 있다.  
-(주석을 많이 달아두었으니 masking에 대해 감이 영 오지 않는다면 읽어보면 도움이 될 것 같다.)
+`masking`에 대한 설명이 조금은 부족하지만, 코드부분에서 추가적인 설명으로 다루도록한다.  
+우선 여기까지만 알면 **Transformer**를 만들 수 있다.  
 
 ## CODE
 
@@ -176,7 +176,9 @@ class MultiHeadAttentionLayer(nn.Module):
 
 mask의 구조에 대해서는 [Transformer](#transformer)에서 좀 더 자세히 말하기로 한다. 간단히만 말하자면 `key`에 대해 참고하면 안되는 값들을 가려주는 장치이다.
 
-`energy`를 왜 $\sqrt{d_k}$로 나누는지에 대해서는 [Encoder Stacks](#encoder-stacks)에서 마저 설명한다.
+추가적으로 `energy`를 $\sqrt{d_k}$로 나누어 scaling을 수행한다.  
+
+이에 관해서는 하고싶은 말이 상당히 많기 때문에 별도의 포스팅을 따로 작성해보겠다. - [**Transformer의 scaling에 대한 고찰**](https://fidabspd.github.io/2022/03/02/analysis_for_transformer.html)
 
 ### Position-Wise Fully Connected Feed-Forward
 
@@ -320,18 +322,9 @@ class Encoder(nn.Module):
 이는 **BERT**등의 Transformer 기반으로 발전한 아키텍쳐에서 쓰이는 방법이기도 하다.  
 각 sequence number를 embedding 레이어에 넣어주면 된다.
 
-<!-- 각 token의 embedding에 대해서는 $\sqrt{d_{model}}$을 곱해준다. [Using the Output Embedding to Improve Language Models](https://arxiv.org/pdf/1608.05859.pdf)의 내용에 기반했다고 한다. 논문을 읽어보지는 않았지만 
+각 token의 embedding에 대해서는 $\sqrt{d_{model}}$을 곱해준다.  
 
-그리고 이것이 [Multi-Head Attention](#multi-head-attention)에서 뒤에서 설명한다 말했던 `energy`를 왜 $\sqrt{d_k}$로 나누는지에 대한 이유 중 하나이다.
-내가 만약 면접관이고 지원자가 Transformer의 바닥까지 깊은 내용을 알고있는지 궁금하다면, `energy`를 왜 $\sqrt{d_k}$로 나누는지 물어볼 것 같다.  
-논문을 읽어보면 이를 수행하지 않으면 성능이 떨어진다고 나온다. 다만 그 이유를 명확히 밝히지는 않고 *이래서 인것으로 예상한다~* 정도의 내용만 나온다.  
-
-개인적인 생각을 덧붙여보자면, 
-- 가장 기본적인 연산상의 이유는 softmax 때문이다.  
-`softmax([1, 2, 3])`과 `softmax([1+1e10, 2+1e10, 3+1e10])`의 값은 같다. 원하는바가 이것이 아님은 분명하다. (왜 같은지는 수식으로 풀어보면 쉽게 알 수 있다.)  
-- 바로 위의 내용과 연결되는 내용으로, 특정 몇개 값이 벡터의 전체적인 scale에 비해 너무 큰 값이 들어오면 문제가 된다. 그럼 attention 벡터에서 특정 몇개 값이 커지는 경우가 어떤 경우일까? query와 key의 벡터가 유사할 때 이다. 그리고 attention에서는 query와 key의 벡터가 유사한 경우가 존재하는게 당연하다. 그리고 그게 *얼마나 클까?*에 대해 생각해보면 되겠다. 최대값이 나오는 경우는 완벽히 같은 벡터의 내적이 발생하는 경우이다. 이는 곧 벡터의 길이의 제곱이 된다.
-고민해보면 많은 통찰을 얻을 수 있다.  
-뒷부분에서 embedding된 token들에 대해 $\sqrt{d_{model}}$을 곱해준 뒤 input하는 내용이 나오는데, 이 또한 연관이 있을 것이다. -->
+이 역시도 [Multi-Head Attention](#multi-head-attention)의 `energy` scaling과 더불어 별도의 포스팅에서 다뤄보겠다. - [**Transformer의 scaling에 대한 고찰**](https://fidabspd.github.io/2022/03/02/analysis_for_transformer.html)
 
 ### Decoder Stacks
 
