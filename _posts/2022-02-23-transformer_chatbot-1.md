@@ -16,14 +16,15 @@ use_math: true
 
 개선하고자 하는 Key는 `seq2seq` ➞ `transformer`이다.
 
-기존에 사용했던 아키텍쳐는 seq2seq에 기반을 두고 있다. 정확히는 인코더와 디코더에 어텐션을 얹어 사용하고있다. 그리고 이것을 Transformer 형태로 바꾸고 싶다.
-사실 Tacotron 이후 Glow-TTS, FastSpeech 등에서 Transformer 기반의 아키텍쳐를 사용하고 있음은 알고있다. (자세히 알고있는 내용은 아니라 말하기가 좀 조심스럽지만.)  
+기존에 사용했던 아키텍쳐는 seq2seq에 기반을 둔 어텐션을 사용하고있다.  
+그리고 이것을 Transformer 형태로 바꾸고 싶다.
+Tacotron 이후 Glow-TTS, FastSpeech 등에서 Transformer 기반의 아키텍쳐를 사용하고 있다고 들었다. (자세히 알고있는 내용은 아니라 말하기가 좀 조심스럽지만.)  
 그래서 이런 최신 아키텍쳐를 공부하고 구현하는 방식을 택해볼까 싶기도 했지만, 이번에는 나만의 연구를 해보고 싶었다. 최신 SOTA를 놔두고 Tacotron 개선 연구는 어쩌면 단순한 뒷북치기일지도 모르지만, SOTA를 참고하지 않고 나만의 연구를 한다는 점에서 분명 배우는 것이 있을 것이라 생각한다.
 
 ## Transformer
 
-순서대로라면 데이터 수집부터 시작해야겠지만 *구조를 이렇게 바꿀거다!*를 선언해버린 이상 Transformer를 지금 짚지 않고 넘어가는 것도 좀 웃기다.  
-어차피 Transformer를 만들어 씌우는게 목적이니, 일단은 Transformer를 이용한 챗봇을 만들어보자. 그 뒤에 데이터 수집부터 시작한다. (솔직히 재미있을 것 같아서 빨리 하고싶었다..!)
+순서대로라면 데이터 수집부터 시작하는게 일반적이겠지만 *구조를 이렇게 바꿀거다!*를 선언해버린 만큼 Transformer를 먼저 짚고 넘어가고 싶다.  
+어차피 Transformer를 만들어 씌우는게 목적이니, 일단은 Transformer를 이용한 챗봇을 만들어보자. 그 뒤에 데이터 수집부터 시작한다. (솔직히 챗봇 만드는게 재미있을 것 같아서 빨리 하고싶었다..!)
 
 우선은 Transformer를 구현해보자.  
 
@@ -79,6 +80,15 @@ $Attention(Q, K, V) = softmax\bigg(\dfrac{QK^T}{\sqrt{d_k}}\bigg)V\;, \quad \mat
 
 `masking`에 대한 설명이 조금은 부족하지만, 코드부분에서 추가적인 설명으로 다루도록한다.  
 우선 여기까지만 알면 **Transformer**를 만들 수 있다.  
+
+PyTroch를 이용하여 Transformer를 만들어보자.
+
+**PyTorch를 택한 이유**  
+사실 Tensorflow의 subclassing 형태로 만들고있다가 ([텐플 코드](https://github.com/fidabspd/ml_basic/blob/master/transformer/codes/transformer_tf.py)) PyTroch로 돌렸다.  
+여러가지 이유가 있었는데 가장 결정적이었던 이유는 텐서보드 그래프가 너무 예쁘지 않았다. 잘 몰라서 못그리는건지, 아니면 어쩔 수 없는건지 모르겠지만 텐서플로우는 텐서보드 그래프가 파이토치에 비해 가시성이 좋지 않았다.  
+사소한 이유로는 `tf.keras.layers.Layer`와 `tf.keras.models.Model`과 `tf.Module`의 경계가 모호하게 느껴졌다. 어차피 subclassing형태로 epoch과 batch를 직접 만들 생각이었기에 keras의 `fit`이나 `predict`, `Callback`등을 사용할 일은 없었다. 그래서 세개가 더더욱 애매하게 느껴졌다.
+
+반면에 파이토치는 텐서보드 그래프 가시성도 좋았고 `nn.Module`도 직관적으로 느껴졌다.
 
 ## CODE
 
