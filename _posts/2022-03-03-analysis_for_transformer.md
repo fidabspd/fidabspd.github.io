@@ -16,7 +16,7 @@ use_math: true
 >$Attention(Q, K, V) = softmax\bigg(\dfrac{QK^T}{\sqrt{d_k}}\bigg)V$
 
 1. Input과 Target의 embedding 벡터에 $\sqrt{d_{model}}$를 곱한다.
->In the embedding layers, we multiply those weights by $d_{model}$.
+>In the embedding layers, we multiply those weights by $\sqrt{d_{model}}$.
 
 해당 순서대로 살펴보도록 하자.
 
@@ -204,7 +204,7 @@ $d_k$를 사용했을 때는 0.28 위로 올라간적이 한번도 없다.
 softmax의 미분값은 해당 값이 0.5일때 최대값을 가진다. 그래서 gradient vanishing을 최대한 줄이려면 0 이나 1 가까이보다는 0.5 근처에 모여있는게 좋다.  
 하지만 softmax는 모든 합이 1이므로 $d_k$의 값이 커질수록 각각의 값은 필연적으로 0에 가까워질 수 밖에 없다.  
 
-그래서 각각을 softmax에 넣기 전 각각의 값들을 적당히 평탄하게 만들어주는게 좋다. 그렇다고 너무 평평해지면 미분값이 커야할 값들이 별다른 차별점을 가지지 못하게 되는 수도 있으니 scaling에는 적당한 값이 필요할 것이다. 그 적절한 값이 정확히 어디인지는 모르겠지만 현재 상황에서는 $\sqrt{d_k}$ 보다는 $d_k$에 가깝지 않았나 하는 생각이다.
+그래서 각각을 softmax에 넣기 전 각각의 값들을 적당히 평탄하게 만들어주는게 좋다. 그렇다고 너무 평평해지면 커야할 값들이 별다른 차별점을 가지지 못하게 되는 수도 있으니 scaling에는 적당한 값이 필요할 것이다. 그 적절한 값이 정확히 어디인지는 모르겠지만 현재 상황에서는 $\sqrt{d_k}$ 보다는 $d_k$에 가깝지 않았나 하는 생각이다.
 
 번외로 $\sqrt{d_k}$ 도 $d_k$ 도 아닌 훨씬 더 큰값인 $d_k^2$ 으로 나누어 scaling 해주는 실험도 몇번 반복 해봤다.  
 결론부터 말하면 현재 상황에서 $\sqrt{d_k}$ 보다는 성능이 좋았고 $d_k$ 보다는 근소하게 비슷하거나 좋지 않았다.  
@@ -215,9 +215,9 @@ softmax의 미분값은 해당 값이 0.5일때 최대값을 가진다. 그래�
 **softmax 미분 참고**  
 $\mathbf{Let} \; a = \dfrac{e^{z_1}}{e^{z_1}+e^{z_2}+e^{z_3}}\;, \quad \dfrac{\partial a}{\partial z_1} = a(1-a)$
 
-Scaled Dot-Product Attention의 scaling에 대해서는 여기서 마무리하고 Input과 Target의 embedding 벡터에 $\sqrt{d_{model}}$를 곱하는 부분으로 넘어가보자.
+Scaled Dot-Product Attention의 scaling에 대해서는 여기서 마무리하고 Input과 Target의 token embedding 벡터에 $\sqrt{d_{model}}$를 곱하는 부분으로 넘어가보자.
 
-## Embedding Vector Scaling
+## Token Embedding Vector Scaling
 
 [Chatbot 만들기 (1)의 `Encoder`와 `Decoder`](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html#encoder-stacks)의 embedding 부분을 보자.
 
@@ -267,7 +267,7 @@ token embedding의 결과에 $\sqrt{d_{model}}$을 곱하고 position embedding�
 
 우선 $\sqrt{d_{model}}$을 곱하는 scaling을 빼보자.
 
-#### Embedding Scaling 제거
+#### Token Embedding Scaling 제거
 
 ```
 ------------------------------
