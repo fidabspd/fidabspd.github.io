@@ -1,6 +1,6 @@
 # SITE CONFIGURATION
 baseurl: ""
-url: "https://fidabspd.github.io"
+url: https://fidabspd.github.io
 
 # THEME-SPECIFIC CONFIGURATION
 title: Keep Calm and Code On                                    # site's title
