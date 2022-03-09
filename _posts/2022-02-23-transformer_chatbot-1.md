@@ -17,9 +17,13 @@ use_math: true
 개선하고자 하는 Key는 `seq2seq` ➞ `transformer`이다.
 
 기존에 사용했던 아키텍쳐는 seq2seq에 기반을 둔 어텐션을 사용하고있다.  
-그리고 이것을 Transformer 형태로 바꾸고 싶다.
-Tacotron 이후 Glow-TTS, FastSpeech 등에서 Transformer 기반의 아키텍쳐를 사용하고 있다고 들었다. (자세히 알고있는 내용은 아니라 말하기가 좀 조심스럽지만.)  
-그래서 이런 최신 아키텍쳐를 공부하고 구현하는 방식을 택해볼까 싶기도 했지만, 이번에는 나만의 연구를 해보고 싶었다. 최신 SOTA를 놔두고 Tacotron 개선 연구는 어쩌면 단순한 뒷북치기일지도 모르지만, SOTA를 참고하지 않고 나만의 연구를 한다는 점에서 분명 배우는 것이 있을 것이라 생각한다.
+그리고 이것을 Transformer 형태로 바꾸고 싶다.  
+좀 찾아보니 당연하게도 Transformer를 TTS에 활용한 사례는 많이 보였다. 그중 다음 두 논문을 참고해 TTS를 구현해볼 생각이다.  
+
+- [Neural Speech Synthesis with Transformer Network](https://arxiv.org/abs/1809.08895)  
+- [MultiSpeech: Multi-Speaker Text to Speech with Transformer](https://arxiv.org/abs/2006.04664)
+
+그냥 최근 TTS 분야의 SOTA를 파볼까 싶기도 했지만 일단은 한걸음씩 가보자.
 
 ## Transformer
 
