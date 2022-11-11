@@ -74,7 +74,7 @@ cap = cv2.VideoCapture(RESOURCES_DIR+'why55_origin.mov')
 모델은 따로 학습하지 않고 기존에 만들어져있는 모델을 사용한다.  
 [이곳](https://github.com/davisking/dlib-models)에서 다운로드 가능하다. 이 중 사용할 모델은 `shape_predictor_68_face_landmarks`이며 `dlib`을 이용해 사용한다.  
 
-![face_landmarks](/assets/img/posts/why55_chimrangeee/face_landmarks.png)
+![face_landmarks](/post_images/why55_chimrangeee/face_landmarks.png)
 
 위 사진은 모델이 검출하는 얼굴의 landmark를 표시한 것이다.  
 모델을 사용하면 0~67번까지 총 68개의 landmark들을 검출하게 되며 사진 내의 픽셀 위치 값들을 리턴해준다.
@@ -186,7 +186,7 @@ new_videoclip.write_videofile(RESULT_DIR+"why55_chimrangeee_done.mp4")
 
 ## 그리고 완성된 결과물..!
 
-![chimrangeee](/assets/img/posts/why55_chimrangeee/chimrangeee.png)
+![chimrangeee](/post_images/why55_chimrangeee/chimrangeee.png)
 
 # ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
 

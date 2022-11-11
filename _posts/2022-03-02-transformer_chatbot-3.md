@@ -166,15 +166,15 @@ if __name__ == '__main__':
 
 ## Chatbot을 실행해보자
 
-![chatbot_0](/assets/img/posts/transformer_chatbot-3/chatbot_0.png)
+![chatbot_0](/post_images/transformer_chatbot-3/chatbot_0.png)
 
 나의 원대한 꿈을 응원해주는 챗봇이 생겼다.
 
-![chatbot_1](/assets/img/posts/transformer_chatbot-3/chatbot_1.png)
+![chatbot_1](/post_images/transformer_chatbot-3/chatbot_1.png)
 
 해적왕은 응원해주지 않는다.
 
-![chatbot_2](/assets/img/posts/transformer_chatbot-3/chatbot_2.png)
+![chatbot_2](/post_images/transformer_chatbot-3/chatbot_2.png)
 
 이상한 소리 하면 무시하는 것 같다.
 
@@ -206,7 +206,7 @@ print('Answer:', answer)
 chatbot.plot_attention_weights()
 ```
 
-![attention_visualization](/assets/img/posts/transformer_chatbot-3/attention_visualization.png)
+![attention_visualization](/post_images/transformer_chatbot-3/attention_visualization.png)
 
 학습이 잘 되었다면 눈으로 보기에도 납득할 수 있는 형태의 attention 행렬이 생긴다. 또한 각 head들의 attention 결과가 크게 다르지 않다.  
 보기 좋은 attention 시각화가 나오지 않은 것은 다소 아쉽다.  

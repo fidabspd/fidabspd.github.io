@@ -245,9 +245,9 @@ token embedding의 결과에 $\sqrt{d_{model}}$을 곱하고 position embedding�
 
 혹시 내가 해석을 잘못한걸까? 구글링도 해보자.
 
-![embedding_scale_question_0.png](/assets/img/posts/analysis_for_transformer/embedding_scale_question_0.png)
+![embedding_scale_question_0.png](/post_images/analysis_for_transformer/embedding_scale_question_0.png)
 
-![embedding_scale_question_1.png](/assets/img/posts/analysis_for_transformer/embedding_scale_question_1.png)
+![embedding_scale_question_1.png](/post_images/analysis_for_transformer/embedding_scale_question_1.png)
 
 비슷한 의구심을 품은 질문들이 보인다. 해석을 잘못한건 아닌 모양이다.  
 다행이다. ~~다행이 아닌가..? 논문에는 왜 이유를 써놓지 않았을까~~

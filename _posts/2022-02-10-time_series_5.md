@@ -322,7 +322,7 @@ def visualize(data):
 visualize(new_data)
 ```
 
-![target_visual](/assets/img/posts/time_series_5/target_visual.png)
+![target_visual](/post_images/time_series_5/target_visual.png)
 
 위 데이터에서 볼 수 있듯 대부분의 시계열 데이터는 요일, 시간, 날짜 등의 변수들에 굉장히 의존적이다.  
 현재는 multi-task learning을 진행중이므로 건물별 특징 또한 포함시켜야한다.  
@@ -350,7 +350,7 @@ def visualize_na_rate(data):
 visualize_na_rate(new_data)
 ```
 
-![na_dist](/assets/img/posts/time_series_5/na_dist.png)
+![na_dist](/post_images/time_series_5/na_dist.png)
 
 그냥 무작위로 결측값을 만들었기 때문에 건물번호, 날짜, 시간, 요일, 휴일여부 등에 관계 없이 고르게 결측값이 분포하는 모습이 보인다.  
 만약 그렇지 않고 특정한 곳에만 결측값이 몰려있다면 해당 결측값을 더 잘 채우기위해 고민해야한다.  
