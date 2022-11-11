@@ -1,12 +1,10 @@
 ---
-layout: post
 title: Transformer - Chatbot 만들기 (3)
-tags: [Chatbot, NLP, Transformer, PyTorch]
-excerpt_separator: <!--more-->
+tags: Chatbot, NLP, Transformer, PyTorch
 use_math: true
 ---
 
-[지난 포스팅](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)에서 훈련을 마친 Transformer로 Chatbot을 만들어보자.<!--more-->
+[지난 포스팅](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)에서 훈련을 마친 Transformer로 Chatbot을 만들어보자.
 
 ## 목차
 

@@ -1,12 +1,10 @@
 ---
-layout: post
 title: Transformer - Chatbot 만들기 (1)
-tags: [Chatbot, NLP, Transformer, PyTorch]
-excerpt_separator: <!--more-->
+tags: Chatbot, NLP, Transformer, PyTorch
 use_math: true
 ---
 
-과거 TTS 프로젝트를 진행해본 적이 있다. 해당 프로젝트 당시 **carpedm20** 님의 [multi-speaker-tacotron-tensorflow](https://github.com/carpedm20/multi-speaker-tacotron-tensorflow)를 참고하여 사용했고, 꽤나 의미있는 결과물을 만들어냈다. 나름의 소스 리뷰를 거쳤고 데이터 수집부터 직접 녹음한 목소리를 함께 train하여 결과물을 만들기도 했지만 아쉬움이 남는다.<!--more--> 그 이유는 '이 프로젝트를 100% 이해하고 있나?'라는 질문에 자신있게 'Yes!'라고 대답하지 못하겠다. 물론 해당 프로젝트에 대한 질문을 받으면 대답하는데 무리는 없다. 하지만 이정도로 만족하지 못하겠다. 그런 의미에서 기존의 아키텍쳐를 답습하여 그대로 만들기보단, 기존의 아키텍쳐를 발전시켜 새로운 TTS를 만들어보자.
+과거 TTS 프로젝트를 진행해본 적이 있다. 해당 프로젝트 당시 **carpedm20** 님의 [multi-speaker-tacotron-tensorflow](https://github.com/carpedm20/multi-speaker-tacotron-tensorflow)를 참고하여 사용했고, 꽤나 의미있는 결과물을 만들어냈다. 나름의 소스 리뷰를 거쳤고 데이터 수집부터 직접 녹음한 목소리를 함께 train하여 결과물을 만들기도 했지만 아쉬움이 남는다. 그 이유는 '이 프로젝트를 100% 이해하고 있나?'라는 질문에 자신있게 'Yes!'라고 대답하지 못하겠다. 물론 해당 프로젝트에 대한 질문을 받으면 대답하는데 무리는 없다. 하지만 이정도로 만족하지 못하겠다. 그런 의미에서 기존의 아키텍쳐를 답습하여 그대로 만들기보단, 기존의 아키텍쳐를 발전시켜 새로운 TTS를 만들어보자.
 
 ## How To Improve
 

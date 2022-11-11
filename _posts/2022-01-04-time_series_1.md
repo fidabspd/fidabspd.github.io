@@ -1,11 +1,9 @@
 ---
-layout: post
 title: Time Series - 시계열 데이터의 기본적인 특징과 간단한 모델
-tags: [Time-Series, Tensorflow, Keras]
-excerpt_separator: <!--more-->
+tags: Time-Series, Tensorflow, Keras
 ---
 
-오래전 처음 시계열 데이터를 접하고 일반적인 정형 데이터와는 다름에 당황도 많이 했고 이런저런 문제점들을 많이 겪었다. 내가 직접 겪었던 '어라?'포인트들과 이를 해결하는 과정의 '아하!'포인트 들을 정리하여 하나의 시리즈로 엮어 보기로 결심했다. 이에 시계열 데이터를 다루고 TensorFlow로 모델을 구성하는 데 있어 겪는 문제들과 그에 대한 가이드를 시리즈 형식으로 정리해보려 한다.<!--more--> 시리즈가 진행됨에 따라 생기는 문제점 대부분 필자가 프로젝트를 진행함에 있어 실제로 겪었던 문제점 들이고 해결 방법들 역시 대부분이 실제 사용했던 방법들이다.  
+오래전 처음 시계열 데이터를 접하고 일반적인 정형 데이터와는 다름에 당황도 많이 했고 이런저런 문제점들을 많이 겪었다. 내가 직접 겪었던 '어라?'포인트들과 이를 해결하는 과정의 '아하!'포인트 들을 정리하여 하나의 시리즈로 엮어 보기로 결심했다. 이에 시계열 데이터를 다루고 TensorFlow로 모델을 구성하는 데 있어 겪는 문제들과 그에 대한 가이드를 시리즈 형식으로 정리해보려 한다. 시리즈가 진행됨에 따라 생기는 문제점 대부분 필자가 프로젝트를 진행함에 있어 실제로 겪었던 문제점 들이고 해결 방법들 역시 대부분이 실제 사용했던 방법들이다.  
 
 기본적인 시계열 데이터의 특징을 알아보고 간단한 모델을 만드는 것으로 시계열 시리즈의 첫번째를 시작한다. 
 아주 간단한 시계열 모델에 점차 살을 붙여가는 형식으로 진행될 예정이며 목차는 다음과 같다.
@@ -133,7 +131,7 @@ data = data.loc[data['num'] == 1, ['date_time', 'target']]
 data
 ```
 
-![data](/assets/img/posts/time_series_1/data.png)  
+![data](/images/time_series_1/data.png)  
 20년 6월 1일부터 20년 8월 24일까지 시간(hour)단위로 구성된 데이터
 
 ### train, valid, test 구성
@@ -274,7 +272,7 @@ train, valid, test = split_data(data, CONFIGS)
 train
 ```
 
-![train](/assets/img/posts/time_series_1/train.png)  
+![train](/images/time_series_1/train.png)  
 
 ```python
 seqence_length = 2040 - 24*7*2  # valid와 test를 빼줬기 때문에 -24*7*2
@@ -386,7 +384,7 @@ CONFIGS['es_patience'] = 10
 history = train_model(model, train, valid, CONFIGS)
 ```
 
-![model_summary](/assets/img/posts/time_series_1/model_summary.png)  
+![model_summary](/images/time_series_1/model_summary.png)  
 
 ### Evaluate
 

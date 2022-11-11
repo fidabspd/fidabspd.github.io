@@ -1,12 +1,9 @@
 ---
-layout: post
 title: Time Series - Recursive Input Prediction
-tags: [Time-Series, Tensorflow, Keras]
-excerpt_separator: <!--more-->
+tags: Time-Series, Tensorflow, Keras
 ---
 
 앞선 시계열 시리즈들에서 validset과 testset의 sequence길이는 모두 일주일이었다. 하지만 `target_length`는 3에 불과했다. 계속 하던 방식처럼 trainset의 일부를 testset으로 분리하는 방식이 아닌 정말로 미래의 데이터를 예측해야하는 경우였다면 앞선 내용들은 세시간 뒤의 미래밖에 예측할 수 없다.  
-<!--more-->
 이를 일주일을 통째로 예측하기 위해서는 두가지 방법이 있다.
 
 1. `target_length`를 일주일로 늘린다.

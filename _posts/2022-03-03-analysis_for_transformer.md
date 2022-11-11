@@ -1,8 +1,6 @@
 ---
-layout: post
 title: Transformer의 Scaling에 대한 고찰
-tags: [Transformer, PyTorch]
-excerpt_separator: <!--more-->
+tags: Transformer, PyTorch
 use_math: true
 ---
 
@@ -10,7 +8,7 @@ use_math: true
 그에 대한 내용이다.
 
 앞서 말한것 처럼 [Attention Is All You Need](https://arxiv.org/abs/1706.03762)에서 제시하는 Transformer 아키텍쳐에는 두번의 scaling이 있다.  
-논문에 등장하는 순서대로 보면 다음과 같다.  <!--more-->
+논문에 등장하는 순서대로 보면 다음과 같다.
 
 1. Multi-Head Attention의 Query와 Key의 행렬곱을 $\sqrt{d_k}$로 나눈다.  
 >$Attention(Q, K, V) = softmax\bigg(\dfrac{QK^T}{\sqrt{d_k}}\bigg)V$

@@ -1,15 +1,13 @@
 ---
-layout: post
 title: 오렌지가 되어버린 침착맨의 '55도발 왜 하냐고'
-tags: [Computer-Vision, OpenCV, dlib]
-excerpt_separator: <!--more-->
+tags: Computer-Vision, OpenCV, dlib
 ---
 
 최근 흥미에 초점을 둔 공부를 시작했다. 이에 첫 프로젝트로 [어노잉 오렌지](https://namu.wiki/w/%EC%96%B4%EB%85%B8%EC%9E%89%20%EC%98%A4%EB%A0%8C%EC%A7%80) 직접 만들기를 진행하기로 했다.  
 
 어노잉 오렌지 만들기라는 주제를 보자마자 떠올린건 *[55도발 왜 하냐고](https://www.youtube.com/watch?v=KGQEnx67lsU)의 침착맨을 오렌지로 만든다면 너무 재밌겠는데...?*  
 
-그렇게 시작된 **오렌지가 되어버린 침착맨의 '55도발 왜 하냐고'** 만들기 <!--more-->
+그렇게 시작된 **오렌지가 되어버린 침착맨의 '55도발 왜 하냐고'** 만들기
 
 ## 원본 코드 ➞ [<span style="color:#AC1538">CODE (GitHub)</span>](https://github.com/fidabspd/toy/blob/master/annoying_orange/codes/main.py)
 

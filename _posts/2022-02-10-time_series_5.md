@@ -1,13 +1,10 @@
 ---
-layout: post
 title: Time Series - 시계열 target의 결측
-tags: [Time-Series, Tensorflow, Keras]
-excerpt_separator: <!--more-->
+tags: Time-Series, Tensorflow, Keras
 ---
 
 보통의 다른 데이터들은 결측값이 존재한다면 이를 다양한 방법으로 채우게 된다. 시계열 데이터도 마찬가지로 다양한 방법으로 이를 채우면 된다. 하지만 한가지가 크게 다르다.  
 그것은 바로 독립변수를 곧 종속변수로 활용하기 때문이고, 이 작은 차이가 굉장히 큰 차이를 만든다.  
-<!--more-->
 독립변수에 결측값이 존재한다면 어떻게든 채워넣으면 그만이지만 종속변수에 결측이 존재한다면 어떻게 해야할까? 이를 자세히 알아보도록 하자.
 
 ## 목차

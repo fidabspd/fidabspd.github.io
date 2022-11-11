@@ -1,13 +1,11 @@
 ---
-layout: post
 title: Time Series - Multi-input 시계열 모델
-tags: [Time-Series, Tensorflow, Keras]
-excerpt_separator: <!--more-->
+tags: Time-Series, Tensorflow, Keras
 ---
 
 앞선 두개의 시계열 포스팅 시리즈에서는 target을 예측함에 있어 이전 시간대의 target만을 이용해 데이터를 구성하고 예측을 진행했다.  
 하지만 원본 데이터는 target 외에 기온, 풍속, 습도, 강수량, 날짜정보 등을 다른 다양한 데이터들 또한 함께 제공한다. 
-이들을 함께 input으로 사용하여 모델을 구성해보자.  <!--more-->  
+이들을 함께 input으로 사용하여 모델을 구성해보자.
 
 ## 목차
 
