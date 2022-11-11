@@ -1,6 +1,6 @@
 ---
 title: Time Series - tf.data.Dataset을 이용한 시계열 데이터 구성
-tags: Time-Series, Tensorflow, Keras
+tags: [Time-Series, Tensorflow, Keras]
 ---
 
 [시계열 데이터의 기본적인 특징과 간단한 모델](https://fidabspd.github.io/2022/01/04/time_series_1.html)에서 기본적인 시계열 데이터의 특징을 알아보고 간단한 모델을 만들었다.  

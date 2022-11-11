@@ -1,6 +1,6 @@
 ---
 title: 오렌지가 되어버린 침착맨의 '55도발 왜 하냐고'
-tags: Computer-Vision, OpenCV, dlib
+tags: [Computer-Vision, OpenCV, dlib]
 ---
 
 최근 흥미에 초점을 둔 공부를 시작했다. 이에 첫 프로젝트로 [어노잉 오렌지](https://namu.wiki/w/%EC%96%B4%EB%85%B8%EC%9E%89%20%EC%98%A4%EB%A0%8C%EC%A7%80) 직접 만들기를 진행하기로 했다.  

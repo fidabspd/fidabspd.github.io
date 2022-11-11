@@ -1,6 +1,6 @@
 ---
 title: Transformer - Chatbot 만들기 (1)
-tags: Chatbot, NLP, Transformer, PyTorch
+tags: [Chatbot, NLP, Transformer, PyTorch]
 use_math: true
 ---
 

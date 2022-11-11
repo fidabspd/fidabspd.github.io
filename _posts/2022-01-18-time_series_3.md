@@ -1,6 +1,6 @@
 ---
 title: Time Series - Multi-input 시계열 모델
-tags: Time-Series, Tensorflow, Keras
+tags: [Time-Series, Tensorflow, Keras]
 ---
 
 앞선 두개의 시계열 포스팅 시리즈에서는 target을 예측함에 있어 이전 시간대의 target만을 이용해 데이터를 구성하고 예측을 진행했다.  
