@@ -134,7 +134,7 @@ data = data.loc[data['num'] == 1, ['date_time', 'target']]
 data
 ```
 
-![data](/post_images/time_series_1/data.png)  
+![data](/images/for_post/time_series_1/data.png)  
 20년 6월 1일부터 20년 8월 24일까지 시간(hour)단위로 구성된 데이터
 
 ### train, valid, test 구성
@@ -275,7 +275,7 @@ train, valid, test = split_data(data, CONFIGS)
 train
 ```
 
-![train](/post_images/time_series_1/train.png)  
+![train](/images/for_post/time_series_1/train.png)  
 
 ```python
 seqence_length = 2040 - 24*7*2  # valid와 test를 빼줬기 때문에 -24*7*2
@@ -387,7 +387,7 @@ CONFIGS['es_patience'] = 10
 history = train_model(model, train, valid, CONFIGS)
 ```
 
-![model_summary](/post_images/time_series_1/model_summary.png)  
+![model_summary](/images/for_post/time_series_1/model_summary.png)  
 
 ### Evaluate
 

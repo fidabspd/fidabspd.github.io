@@ -48,7 +48,7 @@ toc_sticky : true
 
 시계열 데이터 첫번째 시리즈 [시계열 데이터의 기본적인 특징과 간단한 모델](https://fidabspd.github.io/2022/01/04/time_series_1.html)에서 sequential하게 주어진 시계열 데이터를 하나의 row가 하나의 데이터를 나타내도록 형태를 변형하는 작업을 거쳤다.  
 
-![orod](/post_images/time_series_2/orod.png)  
+![orod](/images/for_post/time_series_2/orod.png)  
 
 딱 봐도 같은 데이터가 여러번 반복되고있고 메모리 사용이 비효율 적일 것이라는게 눈에 보인다. 그리고 이를 만드는 과정 자체도 수고롭다.  
 tf.data를 이용해 이 모든 것을 해결할 수 있다. 메모리를 효율적으로 사용하고 만드는 과정도 간편하게 만들 수 있다.
@@ -67,7 +67,7 @@ TensorFlow 공식 document를 읽어보면 tf.data에 대한 설명은 다음과
 코드를 보고 기능을 하나씩 짚어보자.  
 아래 데이터를 사용한다. (지난번 포스팅의 데이터와 같다.)  
 
-![data](/post_images/time_series_2/data.png)  
+![data](/images/for_post/time_series_2/data.png)  
 
 ```python
 def mk_dataset(data, shuffle=False):

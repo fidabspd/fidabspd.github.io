@@ -51,7 +51,7 @@ toc_sticky : true
 
 어째서 그런지는 [시계열 포스팅 시리즈의 첫번째 글](https://fidabspd.github.io/2022/01/04/time_series_1.html)에서 manual하게 구성했던 데이터를 보면 이해하기 쉽다.  
 
-![train_manual](/post_images/time_series_3/train_manual.png)
+![train_manual](/images/for_post/time_series_3/train_manual.png)
 
 위 데이터를 보면 target만으로 데이터를 구성해도 이미 하나의 row가 하나의 data를 나타내는 데이터의 multi-input과 데이터의 형태가 같다. 이에 target 외에 다른 시계열 데이터들을 함께 input으로 사용한다면 하나의 데이터마다 2D-array가 input으로 들어가는 데이터를 구성해야한다.
 
@@ -116,7 +116,7 @@ data = data.loc[data['num'] == 1, :]
 data
 ```
 
-![data](/post_images/time_series_3/data.png)
+![data](/images/for_post/time_series_3/data.png)
 
 ### 시간 데이터 가공
 
@@ -160,7 +160,7 @@ new_data = mk_time_data(data)
 new_data
 ```
 
-![new_data](/post_images/time_series_3/new_data.png)
+![new_data](/images/for_post/time_series_3/new_data.png)
 
 ### Scaling
 
@@ -371,7 +371,7 @@ CONFIGS['model_type'] = 'conv1d'
 model = set_model(CONFIGS, print_summary=True)
 ```
 
-![model_summary](/post_images/time_series_3/model_summary.png)
+![model_summary](/images/for_post/time_series_3/model_summary.png)
 
 #### Train
 

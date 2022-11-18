@@ -13,7 +13,7 @@ use_math: true
 
 기존에 사용했던 Deep Voice 2 아키텍쳐이다. ([Deep Voice 2: Multi-Speaker Neural Text-to-Speech](https://arxiv.org/abs/1705.08947))
 
-![tacotron](/post_images/transformer_chatbot-1/tacotron.png)
+![tacotron](/images/for_post/transformer_chatbot-1/tacotron.png)
 
 개선하고자 하는 Key는 `seq2seq` ➞ `transformer`이다.
 
@@ -45,7 +45,7 @@ use_math: true
 
 ### Architecture
 
-![transformer_architecture](/post_images/transformer_chatbot-1/transformer_architecture.png)
+![transformer_architecture](/images/for_post/transformer_chatbot-1/transformer_architecture.png)
 
 그 유명한 [Attention Is All You Need](https://arxiv.org/abs/1706.03762)에 소개된 아키텍쳐이다.
 
@@ -70,7 +70,7 @@ use_math: true
 
 각 `attention`은 `Multi-Head Attention`이라고 부르며 구조는 다음과 같다.
 
-![multi_head_attention](/post_images/transformer_chatbot-1/multi_head_attention.png)
+![multi_head_attention](/images/for_post/transformer_chatbot-1/multi_head_attention.png)
 
 - `Multi-Head Attention`은 `Scaled Dot-Product Attention`이 $h(=number\, of\, heads)$번 반복된 구조이다.
     - $h$는 $d_{model}$의 약수여야한다.
