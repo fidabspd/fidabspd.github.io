@@ -1,6 +1,9 @@
 ---
 title: Time Series - 시계열 target의 결측
+excerpt: ""
 tags: [Time-Series, Tensorflow, Keras]
+toc: true
+toc_sticky : true
 ---
 
 보통의 다른 데이터들은 결측값이 존재한다면 이를 다양한 방법으로 채우게 된다. 시계열 데이터도 마찬가지로 다양한 방법으로 이를 채우면 된다. 하지만 한가지가 크게 다르다.  

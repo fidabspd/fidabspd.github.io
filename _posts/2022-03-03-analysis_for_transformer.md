@@ -1,6 +1,9 @@
 ---
 title: Transformer의 Scaling에 대한 고찰
+excerpt: ""
 tags: [Transformer, PyTorch]
+toc: true
+toc_sticky : true
 use_math: true
 ---
 
