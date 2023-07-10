@@ -7,10 +7,9 @@ toc_sticky : true
 use_math: true
 ---
 
-[Chatbot 만들기 (1)](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html)의 [Multi-Head Attention](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html#multi-head-attention)과 [Encoder Stacks](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html#encoder-stacks), [Decoder Stacks](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html#decoder-stacks)에 등장하는 scaling에 대해 다른 포스팅에서 따로 다루겠다고 했다.  
-그에 대한 내용이다.
+Transformer 논문을 아주 깊게 읽었을 때 scaling에 대해 의구심이 들었다.
 
-앞서 말한것 처럼 [Attention Is All You Need](https://arxiv.org/abs/1706.03762)에서 제시하는 Transformer 아키텍쳐에는 두번의 scaling이 있다.  
+[Attention Is All You Need](https://arxiv.org/abs/1706.03762)에서 제시하는 Transformer 아키텍쳐에는 두번의 scaling이 있다.  
 논문에 등장하는 순서대로 보면 다음과 같다.
 
 1. Multi-Head Attention의 Query와 Key의 행렬곱을 $\sqrt{d_k}$로 나눈다.  
@@ -115,7 +114,7 @@ parser.add_argument('--n_epochs', type=int, default=50)
 나머지 여러 파라미터들은 다음과 같이 설정했다.  
 이를 유지한채로 기존의 방법대로 $\sqrt{d_k}$로 나눴을 때와, 새로운 방법 $d_k$로 나눴을 때를 비교해보자.
 
-데이터는 [Chatbot 만들기 (2)](https://fidabspd.github.io/2022/03/01/transformer_chatbot-2.html)에서 사용했던 데이터를 그대로 사용했다.  
+데이터는 [songys](https://github.com/songys)님의 [ChatbotData](https://github.com/songys/Chatbot_data/blob/master/ChatbotData.csv)를 사용하였다.
 
 #### 원래 방식 - $\sqrt{d_k}$ 로 나누기
 
@@ -195,7 +194,7 @@ $d_k$를 사용했을 때는 0.28 위로 올라간적이 한번도 없다.
 
 조금 더 신뢰도를 확보하기 위해 chatbot 데이터 뿐만 아니라 독일어-영어 번역 데이터에 대해서도 적용해봤다. 결과는 똑같았다.
 
-현재 사용하는 데이터와 파라미터 상으로는 $d_k$로 나누는 것이 좋다고 생각해도 되겠다.
+현재 사용하는 데이터와 하이퍼 파라미터 상으로는 $d_k$로 나누는 것이 좋다고 생각해도 되겠다.
 
 #### 이유가 뭘까
 
@@ -219,8 +218,6 @@ $\mathbf{Let} \; a = \dfrac{e^{z_1}}{e^{z_1}+e^{z_2}+e^{z_3}}\;, \quad \dfrac{\p
 Scaled Dot-Product Attention의 scaling에 대해서는 여기서 마무리하고 Input과 Target의 token embedding 벡터에 $\sqrt{d_{model}}$를 곱하는 부분으로 넘어가보자.
 
 ## Token Embedding Vector Scaling
-
-[Chatbot 만들기 (1)의 `Encoder`와 `Decoder`](https://fidabspd.github.io/2022/02/23/transformer_chatbot-1.html#encoder-stacks)의 embedding 부분을 보자.
 
 ```python
 self.scale = torch.sqrt(torch.FloatTensor([hidden_dim])).to(device)
@@ -261,7 +258,7 @@ token embedding의 결과에 $\sqrt{d_{model}}$을 곱하고 position embedding�
 
 >The reason we increase the embedding values before the addition is to make the positional encoding relatively smaller. This means the original meaning in the embedding vector won’t be lost when we add them together.
 
-오호. **positional encoding이 더해지면서 token embedding의 의미가 약해지는걸 방지하기 위함이다.** (나는 positional embedding을 사용하긴 했지만)  
+오호. **positional encoding이 더해지면서 token embedding의 의미가 약해지는걸 방지하기 위함이다.**  
 굉장히 설득력 있다.
 
 진짜인지 궁금하다. 마찬가지로 실험해보자.  
@@ -365,9 +362,7 @@ Epoch Time: 0m 9s
 
 사실 token embedding에 $\sqrt{d_{model}}$을 곱하는 것보다 앞서 실험했던 [Positional Embedding Scaling](#positional-embedding-scaling)에서 한 것 처럼 positional embedding을 $\sqrt{d_{model}}$로 나누는게 결과가 더 좋지 않을까? 하는 기대가 있었다.  
 
-그 이유는 token embedding lookup table을 업데이트하는 가중치가 아니라 그냥 input값으로 본다면?  
-input값의 scale이 전체적으로 크면 통상적으로 모델 loss 수렴에 도움이 되지 않는다. (weight initialize를 어떻게 하느냐에 따라 다르겠지만 첫 batch의 loss가 global minima에서 한참 먼 값이 되어버리는 경우가 많다. 아예 수렴하지 못하고 우주로 가버리는 경우도 있다.)  
-그래서 굳이 멀쩡한 scale을 키우는 것보단 줄이는게 낫지 않을까 싶었는데 결과는 아니었다.
+그 이유는 굳이 멀쩡한 token embedding scale을 키우는 것보단 일종의 참고정보인 positional embedding scale을 줄이는게 낫지 않을까 싶었는데 결과는 아니었다.
 
 그래도 token embedding의 영향력이 줄어드는 것을 막기 위함이라는 컨셉에 큰 차이는 없으니 '[Positional Embedding Scaling](#positional-embedding-scaling)에도 활로가 있지 않을까?'하는 생각에 실험을 한가지 더 해봤다.
 
@@ -407,18 +402,12 @@ Train Loss: 0.304
 Epoch Time: 0m 9s
 ```
 
-기존에 아무것도 건드리지 않은 Transfomer 그대로 사용한 결과인 0.32보다는 좋은 결과가 나왔다.  
-token embedding의 영향력이 줄어드는 것을 막기 위해 positional embedding의 scale을 줄인다는 생각이 틀리지는 않았나보다.
+기존에 아무것도 건드리지 않은 Transfomer 그대로 사용한 결과인 0.32보다는 좋은 결과가 나왔다. 사실 너무 미미한 수준이라 딱히 의미가 있어보이진 않는다. 다만 안좋은 영향이 아니라는 생각은 든다. 왜일까?
 
-그런데 positional embedding의 scaling과 scaled attention의 방식을 바꾼 것을 같이 실행했을 때 어떤 효과가 났기에 positional embedding 단독 사용보다 효과가 좋았을까의 측면으로 본다면 둘의 상호작용에는 확신이 들지 않는다.
-
-그저 scaled positional embedding과 scaled attention의 방식을 바꾸는 것 둘을 함께하면 $QK^T$ 행렬의 scale이 전체적으로 더욱 작아질텐데 그게 효과가 있지 않을까... 하는 정도로 어림짐작간다. 마찬가지로 이 방법에 대해서도 최적의 scaling이 있을텐데 현재로써는 명확하게 보이진 않는지라 아쉽다.
+사실 확신은 들지 않는다. 다만 scaled positional embedding과 scaled attention의 방식을 바꾸는 것 둘을 함께하면 $QK^T$ 행렬의 scale이 전체적으로 더욱 작아질텐데 그게 효과가 있지 않을까... 하는 정도로 어림짐작간다. 마찬가지로 이 방법에 대해서도 최적의 scaling이 있을텐데 현재로써는 명확하게 보이진 않는지라 아쉽다.
 
 ## 마무리
 
-Transformer의 scaling에 대해 깊이 고민하고 탐구해봤다.  
+Transformer의 scaling에 대해 깊이 고민하고 탐구해봤다.
 
-뭔가 시원하게 떨어지는 결론을 얻진 못해서 (특히 Token Embedding에 대해서는 더더욱) 조금 찝찝구리 하지만 혼자 생각해보면서 여러 깨달음을 얻기도 했고, 그런 깨달음이 실제 결과물로 나타날 수도 있음을 눈으로 확인했다.  
-그런점에서 의미있게 느껴진다.
-
-Transformer에 대해서는 충분히 깊게 고민했으니 이제 계속해서 TTS를 향해 달려보자.
+굉장히 오래된 논문이고, 주류 논문임에도 나와 비슷한 고민을 한 사람이 많지 않아서 조금 놀랐다. 그래도 그 덕분에 꽤나 의미 있는 고민을 했고 영양가 있는 글을 쓰지 않았나 생각해본다. 뭔가 시원하게 떨어지는 결론을 얻진 못해서 조금 찝찝구리 하지만 보람찼다!
