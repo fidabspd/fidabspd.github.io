@@ -186,3 +186,10 @@ Training과 Sampling(Inference)은 위 내용 그대로 하면 된다. 아래 �
 ![30](/images/for_post/introduction_to_diffusion/introduction_to_diffusion-30.jpg)
 
 ![31](/images/for_post/introduction_to_diffusion/introduction_to_diffusion-31.jpg)
+
+## 마무리
+
+Langevin dynamics에 대해 잘 몰라서 논문에 해당 내용이 나올 때 좀 띄엄띄엄 읽게 되었다. 그래도 큰 흐름을 이해하는데는 문제가 없었지만 diffusion을 깊게 알고 싶다면 꼭 알아야 할 내용으로 보인다.
+Score와 관련이 있다고 하는데 해당 내용은 추가로 공부 예정.
+
+Diffusion을 처음 접한다면 논문 읽기가 좀 까다롭지만 읽다보면 신기하고 놀랍다. 다들 직접 읽어보시길 추천.
