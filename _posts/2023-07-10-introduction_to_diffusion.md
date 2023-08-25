@@ -125,7 +125,7 @@ $q(\mathbf{x}\_{t-1} \rvert \mathbf{x}\_t, \mathbf{x}\_0)$의 평균과 분산�
 
 그런데 $\tilde{\mu}(\mathbf{x}\_t, \mathbf{x}\_0)$는 $\mathbf{x}\_0$를 $\mathbf{x}\_t$를 이용해 나타냄으로써 한번 더 간단하게 정리가 가능하다. (자세한 수식은 마찬가지로 Appendix에)
 
-이때 $\tilde{\mu}(\mathbf{x}\_t, \mathbf{x}\_0)$의 새로운 식에 모르는 값은 $\epsilon$외에 없다. 따라서 우리가 만들게 될 모델은 $\mathbf{x}\_t$와 $t$를 input으로 받아 $\epsilon$을 추정하게 된다. $\mu$ 자체를 예측하는 방법도 있지만 논문의 abalation study에 따르면 $\epsilon$을 예측하는 것보다 성능이 떨어진다.
+이때 $\tilde{\mu}(\mathbf{x}\_t, \mathbf{x}\_0)$의 새로운 식에 모르는 값은 $\epsilon$외에 없다. 따라서 우리가 만들게 될 모델은 $\mathbf{x}\_t$와 $t$를 input으로 받아 $\epsilon$을 추정하게 된다. $\mu$ 자체를 예측하는 방법도 있지만 논문의 ablation study에 따르면 $\epsilon$을 예측하는 것보다 성능이 떨어진다.
 
 ![19](/images/for_post/introduction_to_diffusion/introduction_to_diffusion-19.jpg)
 
