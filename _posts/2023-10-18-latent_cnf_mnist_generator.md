@@ -336,19 +336,19 @@ def visualize_inference_result(
         z_sample = z_t_samples[i].view(28, 28)
         ax[i].imshow(z_sample.detach().cpu())
         ax[i].set_axis_off()
-        ax[i].set_title("$p(\mathbf{z}_{" + str(t) + "})$")
+        ax[i].set_title("$$p(\mathbf{z}_{" + str(t) + "})$$")
     save_filename = f"infer_{global_step}.png"
     plt.savefig(os.path.join(save_dirpath, save_filename), dpi=300, bbox_inches="tight")
     plt.close()
 ```
 
-[cnf튜토리얼](https://github.com/fidabspd/mywiki/blob/master/tutorial_and_demo/CNF/cnf_tutorial.ipynb)과 마찬가지로 11단계로 cnf를 시각화하였다. $t_0$는 0, $t_1$은 10으로 0 ~ 10까지의 정수일 때의 $z$를 `ImageDecoder`에 태워 latent를 image 형태로 변환하여 시각화 한다. 그 결과는 아래와 같다.
+[cnf튜토리얼](https://github.com/fidabspd/mywiki/blob/master/tutorial_and_demo/CNF/cnf_tutorial.ipynb)과 마찬가지로 11단계로 cnf를 시각화하였다. $$t_0$$는 0, $$t_1$$은 10으로 0 ~ 10까지의 정수일 때의 $$z$$를 `ImageDecoder`에 태워 latent를 image 형태로 변환하여 시각화 한다. 그 결과는 아래와 같다.
 
 ![trial1 generation result](/images/for_post/mnist_generator/trial1_generation_result.png)
 
 정확히 예상했던 결과를 얻었다.
 
-$z_{t_0} \sim \mathcal{N}(0, I),\ z \in \mathbb{R}^2$로 설정하였으므로 (사실 $I$가 아니라 diag가 0.1인 diag matrix로 설정했지만 편의상 그냥 $I$라고 하자. 거기서 거기다.) CNF를 거치지 않은 $z_0$를 `ImageDecoder`에 태울 시, 숫자가 아닌 이상한 모양을 만들어낼 수도, 예쁜 숫자를 만들어 낼 수도 있다. 그리고 cnf를 거치면서 AE의 latent 분포에 매칭되므로 $z_{10}$을 `ImageDecoder`에 태우면 숫자가 생성된다.
+$$z_{t_0} \sim \mathcal{N}(0, I),\ z \in \mathbb{R}^2$$로 설정하였으므로 (사실 $$I$$가 아니라 diag가 0.1인 diag matrix로 설정했지만 편의상 그냥 $$I$$라고 하자. 거기서 거기다.) CNF를 거치지 않은 $$z_0$$를 `ImageDecoder`에 태울 시, 숫자가 아닌 이상한 모양을 만들어낼 수도, 예쁜 숫자를 만들어 낼 수도 있다. 그리고 cnf를 거치면서 AE의 latent 분포에 매칭되므로 $$z_{10}$$을 `ImageDecoder`에 태우면 숫자가 생성된다.
 
 ### Latent Visualization
 
@@ -358,7 +358,7 @@ $z_{t_0} \sim \mathcal{N}(0, I),\ z \in \mathbb{R}^2$로 설정하였으므로 (
 
 완벽하지는 않지만 나쁘지 않다. 숫자들마다 latent가 적절히 구성되었다.
 
-$z_{t_0} \sim \mathcal{N}(0, I)$가 CNF를 탄 결과인 $z_{t_1}$도 시각화 해보자. label을 condition으로 활용하지는 않았기 때문에 숫자별 구분은 무의미하다. 따라서 하나의 색으로만 살펴보도록 하자. 전체적인 분포의 모양이 위와 비슷해야 제대로 된 결과라고 할 수 있을 것이다.
+$$z_{t_0} \sim \mathcal{N}(0, I)$$가 CNF를 탄 결과인 $$z_{t_1}$$도 시각화 해보자. label을 condition으로 활용하지는 않았기 때문에 숫자별 구분은 무의미하다. 따라서 하나의 색으로만 살펴보도록 하자. 전체적인 분포의 모양이 위와 비슷해야 제대로 된 결과라고 할 수 있을 것이다.
 
 ![trial1 cnf latent](/images/for_post/mnist_generator/trial1_cnf_latent.png)
 
@@ -375,7 +375,7 @@ $z_{t_0} \sim \mathcal{N}(0, I)$가 CNF를 탄 결과인 $z_{t_1}$도 시각화 
 
 일단은 일반적인 ELBO를 사용해보도록 하자.
 
-latent diffusion은 reconstruction을 더욱 잘 수행하기 위해 KL divergence에 $10^{-6}$등의 아주 작은 가중치를 사용했다. 이에 착안하여 `recon_loss_weight=3.0`, `kl_divergence_weight=1.0`, `cnf_loss_weight=0.1`을 사용하였다. `kl_divergence_weight=1.0`의 이유는 그냥 너무 작은 수는 하고싶지 않았다. 아마 $10^{-6}$정도의 작은 수를 사용하면 AE보다는 조금 덜 퍼지는 분포를 가지게 되지 않을까.
+latent diffusion은 reconstruction을 더욱 잘 수행하기 위해 KL divergence에 $$10^{-6}$$등의 아주 작은 가중치를 사용했다. 이에 착안하여 `recon_loss_weight=3.0`, `kl_divergence_weight=1.0`, `cnf_loss_weight=0.1`을 사용하였다. `kl_divergence_weight=1.0`의 이유는 그냥 너무 작은 수는 하고싶지 않았다. 아마 $$10^{-6}$$정도의 작은 수를 사용하면 AE보다는 조금 덜 퍼지는 분포를 가지게 되지 않을까.
 
 VAE 형태를 띄도록 모델에서는 Encoder만 변경하였고 loss에 KL divergence를 추가했다. 간단한 변경이고 이 외에는 변경이 없으므로 코드는 생략.
 
@@ -401,20 +401,20 @@ Trial 3는 [Trial 2](#trial-2-vae--cnf-ver1)에서 말한 *일반적인 VAE와 E
 
 $$
 \begin{align*}
-& \int \log (p(\mathbf{x}|\mathbf{z})) q(\mathbf{z}|\mathbf{x}) d\mathbf{z} - \int \log \Big( \dfrac{q(\mathbf{z}|\mathbf{x})}{p(\mathbf{z})} \Big) q(\mathbf{z}|\mathbf{x}) d\mathbf{z} \\
-=\ & \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}|\mathbf{x})} \Big[ \log(p(\mathbf{x}|\mathbf{z})) \Big] - \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}|\mathbf{x})} \Big[ \log \Big( \dfrac{q(\mathbf{z}|\mathbf{x})}{p(\mathbf{z})} \Big) \Big]
+& \int \log (p(\mathbf{x}\vert\mathbf{z})) q(\mathbf{z}\vert\mathbf{x}) d\mathbf{z} - \int \log \Big( \dfrac{q(\mathbf{z}\vert\mathbf{x})}{p(\mathbf{z})} \Big) q(\mathbf{z}\vert\mathbf{x}) d\mathbf{z} \\
+=\ & \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}\vert\mathbf{x})} \Big[ \log(p(\mathbf{x}\vert\mathbf{z})) \Big] - \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}\vert\mathbf{x})} \Big[ \log \Big( \dfrac{q(\mathbf{z}\vert\mathbf{x})}{p(\mathbf{z})} \Big) \Big]
 \quad \because\ definition\ of\ expectation \\
 \end{align*}
 $$
 
 $$
 \begin{align*}
-KL =\ & \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}|\mathbf{x})} \Big[ \log \Big( \dfrac{q(\mathbf{z}|\mathbf{x})}{p(\mathbf{z})} \Big) \Big] \\
-=\ & \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}|\mathbf{x})} \Big[ \log q(\mathbf{z}|\mathbf{x}) \Big] - \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}|\mathbf{x})} \Big[ \log p(\mathbf{z}) \Big]
+KL =\ & \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}\vert\mathbf{x})} \Big[ \log \Big( \dfrac{q(\mathbf{z}\vert\mathbf{x})}{p(\mathbf{z})} \Big) \Big] \\
+=\ & \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}\vert\mathbf{x})} \Big[ \log q(\mathbf{z}\vert\mathbf{x}) \Big] - \mathbb{E}_{\mathbf{z} \sim q(\mathbf{z}\vert\mathbf{x})} \Big[ \log p(\mathbf{z}) \Big]
 \end{align*}
 $$
 
-그리고 보통 $q(\mathbf{z} \vert \mathbf{x})$ 를 Gaussian, $\mathbf{z} \sim \mathcal{N}(0, I)$ 를 가정하기 때문에 KL divergence는 두 정규분포의 KL divergence 계산에 따라 아래와 같다. (두 정규분포간의 KLD 자세한 유도 [참고](https://simpling.tistory.com/33))
+그리고 보통 $$q(\mathbf{z} \vert \mathbf{x})$$ 를 Gaussian, $$\mathbf{z} \sim \mathcal{N}(0, I)$$ 를 가정하기 때문에 KL divergence는 두 정규분포의 KL divergence 계산에 따라 아래와 같다. (두 정규분포간의 KLD 자세한 유도 [참고](https://simpling.tistory.com/33))
 
 $$
 \begin{align*}
@@ -423,37 +423,37 @@ KL(q \Vert p) =\ & \log \Big( \dfrac{\sigma_p}{\sigma_q} \Big) + \dfrac{\sigma_q
 \end{align*}
 $$
 
-이를 현재 상황에 대입해본다면, 당연히 $\mathbf{x}$는 원래의 이미지, $\mathbf{z}$는 latent이다. 본 모델은 VAE와 CNF를 둘 다 사용하기 때문에 VAE의 latent와 CNF의 latent를 구분해야한다. CNF입장에서는 VAE의 latent가 생성해내야하는 target이기 때문에 앞으로 VAE의 latent를 $\mathbf{z}_{t_1}$, CNF의 latent를 $\mathbf{z}_{t_0}$라고 하자. 그리고 당연히 위 ELBO식에서 $\mathbf{z}$는 $\mathbf{z}_{t_1}$를 의미한다. **하지만 이게 prior가 $p(\mathbf{z}_{t_1})$라는 의미가 될 수 있을까?**
+이를 현재 상황에 대입해본다면, 당연히 $$\mathbf{x}$$는 원래의 이미지, $$\mathbf{z}$$는 latent이다. 본 모델은 VAE와 CNF를 둘 다 사용하기 때문에 VAE의 latent와 CNF의 latent를 구분해야한다. CNF입장에서는 VAE의 latent가 생성해내야하는 target이기 때문에 앞으로 VAE의 latent를 $$\mathbf{z}_{t_1}$$, CNF의 latent를 $$\mathbf{z}_{t_0}$$라고 하자. 그리고 당연히 위 ELBO식에서 $$\mathbf{z}$$는 $$\mathbf{z}_{t_1}$$를 의미한다. **하지만 이게 prior가 $$p(\mathbf{z}_{t_1})$$라는 의미가 될 수 있을까?**
 
-Generation(Inference)시에 모델의 시작은 VAE가 아닌 CNF부터 이루어진다. 즉 원칙대로라면 prior는 $p(\mathbf{z}_{t_1})$ 가 아니라 $p(\mathbf{z}_{t_1} | \mathbf{z}_{t_0})$이 맞다. ($\mathbf{z}_{t_0} \sim \mathcal{N}(0, I)$) 따라서 KL을 아래와 같이 바꿀 수 있다.
+Generation(Inference)시에 모델의 시작은 VAE가 아닌 CNF부터 이루어진다. 즉 원칙대로라면 prior는 $$p(\mathbf{z}_{t_1})$$ 가 아니라 $$p(\mathbf{z}_{t_1} \vert \mathbf{z}_{t_0})$$이 맞다. ($$\mathbf{z}_{t_0} \sim \mathcal{N}(0, I)$$) 따라서 KL을 아래와 같이 바꿀 수 있다.
 
 $$
 \begin{align*}
-KL =\ & \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}|\mathbf{x})} \Big[ \log \Big( \dfrac{q(\mathbf{z}_{t_1}|\mathbf{x})}{p(\mathbf{z}_{t_1}|\mathbf{z}_{t_0})} \Big) \Big] \\
-=\ & \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}|\mathbf{x})} \Big[ \log q(\mathbf{z}_{t_1}|\mathbf{x}) \Big] - \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}|\mathbf{x})} \Big[ \log p(\mathbf{z}_{t_1}|\mathbf{z}_{t_0}) \Big]
+KL =\ & \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}\vert\mathbf{x})} \Big[ \log \Big( \dfrac{q(\mathbf{z}_{t_1}\vert\mathbf{x})}{p(\mathbf{z}_{t_1}\vert\mathbf{z}_{t_0})} \Big) \Big] \\
+=\ & \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}\vert\mathbf{x})} \Big[ \log q(\mathbf{z}_{t_1}\vert\mathbf{x}) \Big] - \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}\vert\mathbf{x})} \Big[ \log p(\mathbf{z}_{t_1}\vert\mathbf{z}_{t_0}) \Big]
 \end{align*}
 $$
 
-그런데 여기서 문제가 있는데, $p(\mathbf{z}_{t_1}|\mathbf{z}_{t_0})$ 의 $\mu_p, \sigma_p$ 를 무슨수로 구할 것이냐는 점이다. 그리고 이게 애초에 Gaussian이 맞긴 한가? 하는 생각도 든다.
+그런데 여기서 문제가 있는데, $$p(\mathbf{z}_{t_1}\vert\mathbf{z}_{t_0})$$ 의 $$\mu_p, \sigma_p$$ 를 무슨수로 구할 것이냐는 점이다. 그리고 이게 애초에 Gaussian이 맞긴 한가? 하는 생각도 든다.
 
-따라서 두 Gaussian 간의 KLD 계산 공식인 $\log \Big( \frac{\sigma_p}{\sigma_q} \Big) + \frac{\sigma_q^2 + (\mu_q - \mu_p)^2}{2\sigma_p^2} - \frac{1}{2}$ 는 사용하지 않기로 했다.
+따라서 두 Gaussian 간의 KLD 계산 공식인 $$\log \Big( \frac{\sigma_p}{\sigma_q} \Big) + \frac{\sigma_q^2 + (\mu_q - \mu_p)^2}{2\sigma_p^2} - \frac{1}{2}$$ 는 사용하지 않기로 했다.
 
 ### Loss
 
-그 대신 $\mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}|\mathbf{x})} \Big[ \log q(\mathbf{z}_{t_1}|\mathbf{x}) \Big] - \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}|\mathbf{x})} \Big[ \log p(\mathbf{z}_{t_1}|\mathbf{z}_{t_0}) \Big]$ 이것을 비슷하게나마 사용해보자. 먼저 첫째항은 아래와 같이 정리가 가능하다.
+그 대신 $$\mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}\vert\mathbf{x})} \Big[ \log q(\mathbf{z}_{t_1}\vert\mathbf{x}) \Big] - \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}\vert\mathbf{x})} \Big[ \log p(\mathbf{z}_{t_1}\vert\mathbf{z}_{t_0}) \Big]$$ 이것을 비슷하게나마 사용해보자. 먼저 첫째항은 아래와 같이 정리가 가능하다.
 
 $$
 \begin{align*}
-& \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}|\mathbf{x})} \Big[ \log q(\mathbf{z}_{t_1}|\mathbf{x}) \Big] \\
-= & \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}|\mathbf{x})} \Big[ \log \Big( \dfrac{1}{\sigma_q \sqrt{2\pi}} e^{-\dfrac{1}{2} \big( \dfrac{\mathbf{z}_{t_1} - \mu_q}{\sigma_q} \big)^2} \Big) \Big] \\
-= & \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}|\mathbf{x})} \Big[ -\log\sigma_q -\dfrac{1}{2}\log(2\pi) - \dfrac{1}{2} \big( \dfrac{\mathbf{z}_{t_1} - \mu_q}{\sigma_q} \big)^2 \Big] \\
+& \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}\vert\mathbf{x})} \Big[ \log q(\mathbf{z}_{t_1}\vert\mathbf{x}) \Big] \\
+= & \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}\vert\mathbf{x})} \Big[ \log \Big( \dfrac{1}{\sigma_q \sqrt{2\pi}} e^{-\dfrac{1}{2} \big( \dfrac{\mathbf{z}_{t_1} - \mu_q}{\sigma_q} \big)^2} \Big) \Big] \\
+= & \mathbb{E}_{\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}\vert\mathbf{x})} \Big[ -\log\sigma_q -\dfrac{1}{2}\log(2\pi) - \dfrac{1}{2} \big( \dfrac{\mathbf{z}_{t_1} - \mu_q}{\sigma_q} \big)^2 \Big] \\
 = & -\log\sigma_q -\dfrac{1}{2}\log(2\pi) - \dfrac{\mathbb{E}(\mathbf{z}_{t_1}^2) - 2\mathbb{E}(\mathbf{z}_{t_1})\mu_q + \mu_q^2}{2\sigma_q^2} \\
 = & -\log\sigma_q -\dfrac{1}{2}\log(2\pi) - \dfrac{\sigma_q^2 + \mu_q^2 - 2\mu_q^2 + \mu_q^2}{2\sigma_q^2} \quad \because \sigma_q^2 = \mathbb{E}(\mathbf{z}_{t_1}^2) - \mu_q^2\\
 = & -\log\sigma_q -\dfrac{1}{2}\log(2\pi) - \dfrac{1}{2} \\
 \end{align*}
 $$
 
-둘째항은 $\log p(\mathbf{z}_{t_1}|\mathbf{z}_{t_0})$ 를 직접 계산하는 것이 가능하다. CNF의 loss자체가 이와 같기 때문이다. 다만 이를 그냥 평균을 내게 되면 $\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}|\mathbf{x})$ 에 대한 평균은 아닐 것이다. 그래도 일단 해보자.
+둘째항은 $$\log p(\mathbf{z}_{t_1}\vert\mathbf{z}_{t_0})$$ 를 직접 계산하는 것이 가능하다. CNF의 loss자체가 이와 같기 때문이다. 다만 이를 그냥 평균을 내게 되면 $$\mathbf{z}_{t_1} \sim q(\mathbf{z}_{t_1}\vert\mathbf{x})$$ 에 대한 평균은 아닐 것이다. 그래도 일단 해보자.
 
 새로운 KL divergence에 대한 코드는 아래와 같이 사용했다.
 
