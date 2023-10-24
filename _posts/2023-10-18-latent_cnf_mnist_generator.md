@@ -17,9 +17,9 @@ use_math: true
 1. [VITS](https://arxiv.org/abs/2106.06103)가 이와 비슷한 구조인데 이를 해봤던 경험을 살리고 싶었다.
 2. latent diffusion의 등장으로 diffusion이 핫해졌던 것 처럼 나도 latent를 이용하고 싶었다.
 
-## [Repository](https://github.com/fidabspd/latent_cnf)
+## [Repository](https://github.com/fidabspd/latent-cnf)
 
-**코드는 [여기](https://github.com/fidabspd/latent_cnf)서 확인하실 수 있습니다.**
+**코드는 [여기](https://github.com/fidabspd/latent-cnf)서 확인하실 수 있습니다.**
 
 ## Trial 1. AE + CNF
 
@@ -559,7 +559,7 @@ class FullDiscriminator(nn.Module):
         return outputs, feature_maps
 ```
 
-정확히 훈련에 어떻게 사용했는지는 [repo](https://github.com/fidabspd/latent_cnf)에서 보는 것이 더 편합니다.
+정확히 훈련에 어떻게 사용했는지는 [repo](https://github.com/fidabspd/latent-cnf)에서 보는 것이 더 편합니다.
 
 ### Latent Dimension 확장
 
@@ -644,6 +644,6 @@ class ImageEncoder(nn.Module):
 - CNF에 Label Condition 활용: CNF에 Condition을 사용하여 원하는 Label에 해당하는 latent에 찾아갈 수 있도록 하고싶다.
 - 다른 이미지 사용: 일단은 fashion mnist로 해보면 어떨까 싶다. 잘 되려면 CNF에 Condition 사용이 선행되는 것이 좋을 것 같다.
 
-## [Repository](https://github.com/fidabspd/latent_cnf)
+## [Repository](https://github.com/fidabspd/latent-cnf)
 
-**코드는 [여기](https://github.com/fidabspd/latent_cnf)서 확인하실 수 있습니다.**
+**코드는 [여기](https://github.com/fidabspd/latent-cnf)서 확인하실 수 있습니다.**
